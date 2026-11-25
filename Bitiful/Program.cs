@@ -1,5 +1,5 @@
-﻿MateriaPrima mp = new("teste");
-List<MateriaPrima> lista = MateriaPrima.buscarRegistrosAtivos();
+﻿
+List<MateriaPrima> lista = MateriaPrima.buscarRegistrosInativos();
 
 foreach (MateriaPrima item in lista)
 {
