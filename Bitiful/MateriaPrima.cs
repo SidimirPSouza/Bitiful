@@ -28,6 +28,14 @@
         }            
         
     }// ao criar a materia prima, ela ja vai gerar o caminho e o arquivo caso não exista, gerar o proximo id e salvar no arquivo automaticamente.
+    public MateriaPrima(int id, string nome, DateOnly ultimaCompra, DateOnly dataCadastro, char situacao)
+    {
+        Id = id;
+        Nome = nome;
+        UltimaCompra = ultimaCompra;
+        DataCadastro = dataCadastro;
+        Situacao = situacao;
+    }//construtor apenas para criar um objeto que recebe os atributos resgatados do arquivo(para salvar em uma lista quando necessario)
     private int GerarNovoId()
     {
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
