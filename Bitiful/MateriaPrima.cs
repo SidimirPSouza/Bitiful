@@ -158,6 +158,56 @@
         else
             return new List<MateriaPrima>();
     }
+    public static List<MateriaPrima> buscarRegistrosAtivos()
+    {
+        List<MateriaPrima> lista = new();
+
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                foreach (string linhaAtual in linhas)
+                {
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+                    if(situacao == 'A')
+                    {
+                        int id = int.Parse(linhaAtual.Substring(2, 4));
+                        int contAux = 0;
+
+                        for (int j = 0; j < 20; j++)
+                        {
+                            if (linhaAtual[j + 6] == '*')
+                                contAux++;
+                            else
+                                break;
+                        }
+                        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+
+                        MateriaPrima mp = new(id, nome, dataCadastro, UltimaCompra, situacao);
+                        lista.Add(mp);
+
+                    }
+                    
+                }
+
+            }
+            else
+                return new List<MateriaPrima>();
+
+            return lista;
+
+
+        }
+        else
+            return new List<MateriaPrima>();
+
+    }
 
 
 }

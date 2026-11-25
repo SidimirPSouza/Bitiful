@@ -1,5 +1,5 @@
-﻿MateriaPrima mp = new("pó de maquiagem");
-List<MateriaPrima> lista = MateriaPrima.buscarTodosRegistros();
+﻿MateriaPrima mp = new("teste");
+List<MateriaPrima> lista = MateriaPrima.buscarRegistrosAtivos();
 
 foreach (MateriaPrima item in lista)
 {
