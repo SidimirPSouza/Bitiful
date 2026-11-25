@@ -102,6 +102,16 @@
         return nomeFormatado;       
 
     }
+    public override string ToString()
+    {
+        return $"""
+            Id: {Id}
+            Nome: {Nome}
+            UltimaCompra: {UltimaCompra}
+            DataCadastro: {DataCadastro}
+            Situacao: {Situacao}
+            """;
+    }
 
 
 }
