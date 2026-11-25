@@ -6,22 +6,16 @@
     public decimal ValorTotal { get; set; }
 
     private List<ItemCompra> listaDeCompra = new();
-    
+
     public bool AdicionarItem(ItemCompra itemCompra)
     {
-        if(listaDeCompra.Count < 3)
-        {
-            listaDeCompra.Add(itemCompra);
-
-            foreach (var item in listaDeCompra)
-            {
-                item.CalcularTotal();
-            }
-            return true;
-        }
-        else
+        if (itemCompra == null || listaDeCompra.Count >= 3)
         {
             return false;
         }
+
+        listaDeCompra.Add(itemCompra);
+
+        return true;
     }
 }
