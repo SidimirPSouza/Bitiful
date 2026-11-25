@@ -28,12 +28,12 @@
         }            
         
     }// ao criar a materia prima, ela ja vai gerar o caminho e o arquivo caso não exista, gerar o proximo id e salvar no arquivo automaticamente.
-    public MateriaPrima(int id, string nome, DateOnly ultimaCompra, DateOnly dataCadastro, char situacao)
+    public MateriaPrima(int id, string nome, DateOnly dataCadastro, DateOnly ultimaCompra, char situacao)
     {
         Id = id;
         Nome = nome;
-        UltimaCompra = ultimaCompra;
         DataCadastro = dataCadastro;
+        UltimaCompra = ultimaCompra;
         Situacao = situacao;
     }//construtor apenas para criar um objeto que recebe os atributos resgatados do arquivo(para salvar em uma lista quando necessario)
     private int GerarNovoId()
@@ -105,12 +105,58 @@
     public override string ToString()
     {
         return $"""
-            Id: {Id}
+
+            Id: {ConverterIdFormatoString(Id)}
             Nome: {Nome}
             UltimaCompra: {UltimaCompra}
             DataCadastro: {DataCadastro}
             Situacao: {Situacao}
+
             """;
+    }
+    public static List<MateriaPrima> buscarTodosRegistros()
+    {
+        List<MateriaPrima> lista = new ();
+
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                foreach( string linhaAtual in linhas)
+                {
+                    int id = int.Parse(linhaAtual.Substring(2, 4));
+                    int contAux = 0;
+
+                    for (int j = 0; j < 20; j++)
+                    {
+                        if (linhaAtual[j + 6] == '*')
+                            contAux++;
+                        else
+                            break;
+                    }
+                    string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                    DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                    DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+
+                    //teste
+                    MateriaPrima mp = new(id,nome, dataCadastro, UltimaCompra, situacao);
+                    lista.Add(mp);
+                }
+                
+            }else
+                return new List<MateriaPrima>();
+
+            return lista;
+
+
+        }
+        else
+            return new List<MateriaPrima>();
     }
 
 
