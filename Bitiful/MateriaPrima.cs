@@ -2,69 +2,98 @@
 {
     private int Id { get; set; }
     public string Nome { get; set; }
-    private DateOnly UltimaCompra { get; set; }
+    public DateOnly UltimaCompra { get; set; }
     private DateOnly DataCadastro { get; set; }
-    private char Situacao { get; set; }
+    public char Situacao { get; set; }
 
     public MateriaPrima(string nome)
-    {        
-        Id = GerarNovoId();
-        Nome = nome;
-        UltimaCompra = DateOnly.FromDateTime(DateTime.Now);
-        DataCadastro = DateOnly.FromDateTime(DateTime.Now);
-        Situacao = 'A';
-
-        string idString = ConverterIdFormatoString(Id);
-
-        string linhaParaSalvar = idString+Nome+DataCadastro+UltimaCompra+Situacao;
-        SaveSimple(linhaParaSalvar);
-    }
-    public int GerarNovoId()
     {
-        var path = @"C:\dev\";
-        var file = "MateriaPrima.dat";
-
-        if (!File.Exists(path + file))
-            using (File.Create(path + file)) { }
-
-        int ultimoId = 0;
-
-        string[] linhas = File.ReadAllLines(path + file);
-
-        if (linhas.Length > 0)
+        try
         {
-            string ultimaLinha = linhas[linhas.Length - 1];
-            ultimoId = int.Parse(ultimaLinha.Substring(2, 4));
-            return ultimoId + 1;
+            Id = GerarNovoId();
+            Nome = nome;
+            UltimaCompra = DateOnly.FromDateTime(DateTime.Now);
+            DataCadastro = DateOnly.FromDateTime(DateTime.Now);
+            Situacao = 'A';
+
+            string idString = ConverterIdFormatoString(Id);
+            string nomeString = ConverterNomeFormatoString(Nome);
+
+            string linhaParaSalvar = idString + nomeString + DataCadastro + UltimaCompra + Situacao;
+            Save(linhaParaSalvar);
+        }
+        catch (Exception e) 
+        {
+            Console.WriteLine(e.Message);            
+        }            
+        
+    }// ao criar a materia prima, ela ja vai gerar o caminho e o arquivo caso não exista, gerar o proximo id e salvar no arquivo automaticamente.
+    private int GerarNovoId()
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            
+            int ultimoId = 0;
+
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                string ultimaLinha = linhas[linhas.Length - 1];
+                ultimoId = int.Parse(ultimaLinha.Substring(2, 4));
+                return ultimoId + 1;
+            }
+            else
+                return 1;
+
         }
         else
             return 1;
 
-    }//funcional, utilizando no construtor
-    void SaveSimple(string s)
-    {
-        var path = @"C:\dev\";
-        var file = "MateriaPrima.dat";
-        File.AppendAllText(path + file, s + Environment.NewLine);
     }
-    string ConverterIdFormatoString(int n)
+    private void Save(string s)
     {
-        switch (n)
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
+    }
+    private string ConverterIdFormatoString(int id)
+    {
+        switch (id)
         {
             case < 10:
-                return $"MP000{n}";
+                return $"MP000{id}";
             case < 100:
-                return $"MP00{n}";
+                return $"MP00{id}";
             case < 1000:
-                return $"MP0{n}";
+                return $"MP0{id}";
             case < 10000:
-                return $"MP{n}";
+                return $"MP{id}";
             default:
-                return $"MP0000{n}";
+                return $"MP0000{id}";
         }
 
     }
+    private string ConverterNomeFormatoString(string nome)
+    {
+        string nomeLimitado20;
+        if (nome.Length > 20)
+            nomeLimitado20 = nome.Substring(0, 20);
+        else
+            nomeLimitado20 = nome;
 
+        string nomeFormatado = "";
+        for(int i = 0; i < 20 - nomeLimitado20.Length; i++)
+        {
+            nomeFormatado = nomeFormatado + "*";
+        }
+        nomeFormatado = nomeFormatado + nomeLimitado20;
+        return nomeFormatado;       
+
+    }
 
 
 }

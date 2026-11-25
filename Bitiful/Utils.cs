@@ -16,9 +16,9 @@ internal static class Utils
         }
         else
         {
-            if(!Directory.Exists(caminhoArquivo))
+            if(!File.Exists(caminhoArquivo))
             {
-                File.Create(caminhoArquivo);
+                using (File.Create(caminhoArquivo)){}
             }
         }
         return true;
