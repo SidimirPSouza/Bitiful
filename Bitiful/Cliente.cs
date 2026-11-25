@@ -88,11 +88,11 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
     }
     public void AlteraSexo(char sexo)
     {
-        if (ValidaSexo(sexo))
+        if (ValidaSexo(sexo)) 
         {
             this.Sexo = char.ToUpper(sexo);
         }
-        else
+        else 
         {
             throw new ArgumentException("Sexo inválido");
         }
