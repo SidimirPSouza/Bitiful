@@ -1,13 +1,4 @@
-﻿Producao teste = new Producao();
-
-teste.Cadastrar();
-teste.Cadastrar();
-teste.Cadastrar();
-teste.Cadastrar();
+﻿Producao produzindo = new Producao();
 
 
-
-for (int i = 0; i < teste.Producoes.Count(); i++)
-{
-    Console.WriteLine(teste.Producoes[i]);
-}
+produzindo.Cadastrar("1234567891234", "500");

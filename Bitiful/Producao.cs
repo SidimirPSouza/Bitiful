@@ -1,13 +1,17 @@
-﻿public class Producao
+﻿using System.Runtime.Intrinsics.X86;
+
+public class Producao
 {
-    public static string Id { get; private set; }
+    public string Id { get; private set; }
     public DateOnly DataProducao { get; set; }
     public string Produto { get; set; }
-    public int Quantidade { get; set; }
+    public double Quantidade { get; set; }
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
     public string Arquivo { get; private set; } = "Producao.dat";
-    
-    public List<string> Producoes = new List<string>();
+
+    private string LinhaEscrita { get; set; }
+    public List<Producao> Producoes = new List<Producao>();
+
 
     
     public bool DiretorioExistente()
@@ -62,15 +66,22 @@
     public void CarregarArquivo()
     {
         Producoes.Clear();
+        var sr = new StreamReader(Diretorio + Arquivo);
+        if (sr.Read() == -1) return;
         if (ArquivoExistente())
         {
-            
-
             foreach(var item in File.ReadAllLines(Diretorio + Arquivo))
             {
-                Producoes.Add(item);
+                Producao aux = new Producao();
+                aux.Id = SepararPorTamanho(0, 5, item);
+                aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
+                aux.Produto = SepararPorTamanho(15, 13, item);
+                aux.Quantidade = FormatarQuantidade((SepararPorTamanho(28, 6, item)));
+
+
             }
         }
+        sr.Close();
     }
 
     public void SalvarArquivo()
@@ -78,41 +89,59 @@
         if (ArquivoExistente())
         {
             var sw = new StreamWriter(Diretorio + Arquivo);
+
             foreach(var item in Producoes)
             {
-                sw.WriteLine(item);
+                sw.WriteLine(item.Id + item.DataProducao + item.Produto + item.Quantidade);
             }
             sw.Close();
         }
     }
-    public void Cadastrar()
+    public void Cadastrar(string produto, string quantidade)
     {
+        if (produto.Length > 13 || produto.Length < 0)
+        {
+            Console.WriteLine("Código de barras inválido");
+            return;
+        }
+        if (!ValidarQuantidade(quantidade))
+        {
+            Console.WriteLine("Quantidade inválida, tem que ser no máximo 999,99");
+            return;
+        }
         CarregarArquivo();
+        Producao aux = new Producao();
         if (ArquivoExistente())
         {
-            if (Producoes.Count > 0)
-            {
-             
+            aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
+            aux.Produto = produto;
+            aux.Quantidade = FormatarQuantidade(quantidade);
+            
+            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString();
+            else aux.Id = 1.ToString();
 
-                int aux; //Auxiliar para conversão de tipo de dado
-                aux = int.Parse(Producoes.Last()) + 1;
-                Producoes.Add(aux.ToString().PadLeft(5,'0'));
-                
-            }
-            else Producoes.Add("1".PadLeft(5,'0'));
+
+            Producoes.Add(aux);
         }
         SalvarArquivo();
     }
 
-    public void Localizar()
+    public Producao? Localizar(string id)
     {
-
+        
+        CarregarArquivo();
+        if (Producoes.Count > 0)
+        {
+            Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
+            return _producao;
+        }
+        else return null;
     }
 
-    public void Excluir(string id)
+    public void Excluir(Producao producao)
     {
         CarregarArquivo();
-        Producoes.Remove(id);
+        producao.Producoes.Remove(producao);
         SalvarArquivo();
     }
     public void ImpressaoRegistro()
@@ -120,5 +149,49 @@
 
     }
 
+    string SepararPorTamanho(int inicio, int tamanho, string separada)
+    {
+        string aux = string.Empty;
+        int auxTamanho = tamanho + inicio;
+        for (int i = inicio; i < auxTamanho; i++)
+        {
+            aux += separada[i];
+
+        }
+        return aux;
+    }
+
+    bool ValidarQuantidade(string quantidade)
+    {
+        string[] aux = quantidade.Split(",");
+        if (aux.Contains(","))
+        {
+            if (aux[1].Length > 2) return false;
+            if (aux[0].Length > 3) return false;
+        }
+        else
+        {
+            if (aux[0].Length > 3) return false;
+        }
+        
+        
+        return true;
+    }
+
+    double FormatarQuantidade(string quantidade)
+    {
+        string[] aux = quantidade.Split(",");
+        if (quantidade.Contains(","))
+        {
+            aux[1] = aux[1].PadRight(2, '0');
+            return double.Parse(aux[0] + aux[1]);
+        }
+        else
+        {
+            aux[0] = aux[0].PadLeft(3, '0');
+            return double.Parse(aux[0] + ",00");
+        }
+
+    }
 
 }
