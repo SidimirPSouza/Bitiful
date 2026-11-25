@@ -56,10 +56,46 @@ internal static class Utils
                     return true;
                 }
             }
-            return false;
         }
-
-        return true;
+        return false;
     }
+
+
+
+    //private string ValidarCNPJ(string cnpj)
+
+    //{
+    //    cnpj = LimparCnpj(cnpj);
+
+    //    if (cnpj.Length == 14)
+    //    {
+    //        int[] pesos = new[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+    //        int soma = 0;
+    //        int resto = 0;
+    //        int primeiroDigito = 0;
+    //        int segundoDigito = 0;
+
+    //        for (int i = 0; i < pesos.Length; i++)
+
+    //        {
+    //            soma += int.Parse(cnpj[i].ToString()) * pesos[i];
+    //        }
+
+    //        resto = soma % 11;
+
+    //        if (resto < 2)
+
+    //        {
+    //            primeiroDigito = 0;
+    //        }
+
+    //        else
+    //        {
+
+    //        }
+    //    }
+    //}
+
+    //internal static bool ValidarData(string cpf)
 }
 
