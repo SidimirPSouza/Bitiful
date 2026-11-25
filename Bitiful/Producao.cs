@@ -80,7 +80,10 @@ public class Producao
                 aux.Id = SepararPorTamanho(0, 5, item);
                 aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
                 aux.Produto = SepararPorTamanho(15, 13, item);
-                aux.Quantidade = FormatarQuantidade((SepararPorTamanho(27, 6, item)));
+                string auxiliar = SepararPorTamanho(28, 6, item);
+                Console.WriteLine("auxiliar é " + auxiliar);
+                aux.Quantidade = FormatarQuantidade(auxiliar);
+                Console.WriteLine("auxiliar formatada é  "+  aux.Quantidade);
                 Producoes.Add(aux);
 
             }
@@ -124,7 +127,6 @@ public class Producao
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
             else aux.Id = 1.ToString().PadLeft(5,'0');
 
-
             Producoes.Add(aux);
         }
         SalvarArquivo();
@@ -159,10 +161,12 @@ public class Producao
 
     string SepararPorTamanho(int inicio, int tamanho, string separada)
     {
+        
         string aux = string.Empty;
         int auxTamanho = tamanho + inicio;
         for (int i = inicio; i < auxTamanho; i++)
         {
+           
             aux += separada[i];
 
         }
@@ -189,15 +193,16 @@ public class Producao
     string FormatarQuantidade(string quantidade)
     {
         string[] aux = quantidade.Split(",");
-        if (quantidade.Contains(","))
+        if (quantidade.Contains(','))
         {
             aux[1] = aux[1].PadRight(2, '0');
-            return (aux[0] + "," + aux[1]);
+            aux[0] = aux[0].PadLeft(3, '0');
+            return $"{aux[0]},{aux[1]}";
         }
         else
         {
             aux[0] = aux[0].PadLeft(3, '0');
-            return (aux[0] + ",00");
+            return $"{aux[0]},00";
         }
 
     }
