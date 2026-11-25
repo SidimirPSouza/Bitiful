@@ -8,13 +8,11 @@ public class Producao
     public string Quantidade { get; set; }
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
     public string Arquivo { get; private set; } = "Producao.dat";
-
-    private string LinhaEscrita { get; set; }
     public List<Producao> Producoes = new List<Producao>();
 
 
     
-    public bool DiretorioExistente()
+    public bool DiretorioExistente() //Checando se o diretorio existe e criando ele
     {
         if (Directory.Exists(Diretorio))
         {
@@ -35,7 +33,7 @@ public class Producao
             }
         }
     }
-    public bool ArquivoExistente()
+    public bool ArquivoExistente() //checando se o arquivo existe e criando ele
     {
         if (DiretorioExistente())
         {
@@ -63,11 +61,11 @@ public class Producao
 
     }
 
-    public void CarregarArquivo()
+    public void CarregarArquivo()//carregando a lista com o arquivo
     {
         Producoes.Clear();
         var sr = new StreamReader(Diretorio + Arquivo);
-        if (sr.Read() == -1)
+        if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
         {
             sr.Close();
             return;
@@ -81,9 +79,7 @@ public class Producao
                 aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
                 aux.Produto = SepararPorTamanho(15, 13, item);
                 string auxiliar = SepararPorTamanho(28, 6, item);
-                Console.WriteLine("auxiliar é " + auxiliar);
                 aux.Quantidade = FormatarQuantidade(auxiliar);
-                Console.WriteLine("auxiliar formatada é  "+  aux.Quantidade);
                 Producoes.Add(aux);
 
             }
@@ -91,7 +87,7 @@ public class Producao
         sr.Close();
     }
 
-    public void SalvarArquivo()
+    public void SalvarArquivo()//salvando a lista no arquivo
     {
         if (ArquivoExistente())
         {
@@ -106,12 +102,12 @@ public class Producao
     }
     public void Cadastrar(string produto, string quantidade)
     {
-        if (produto.Length > 13 || produto.Length < 0)
+        if (produto.Length != 13)//o codigo de barras tem que ter 13 caracteres
         {
             Console.WriteLine("Código de barras inválido");
             return;
         }
-        if (!ValidarQuantidade(quantidade))
+        if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99
         {
             Console.WriteLine("Quantidade inválida, tem que ser no máximo 999,99");
             return;
@@ -123,11 +119,13 @@ public class Producao
             aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
             aux.Produto = produto;
             aux.Quantidade = FormatarQuantidade(quantidade);
-            
+
+            //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
             else aux.Id = 1.ToString().PadLeft(5,'0');
 
             Producoes.Add(aux);
+            Console.WriteLine("Cadastrado com sucesso!");
         }
         SalvarArquivo();
     }
@@ -136,30 +134,41 @@ public class Producao
     {
         
         CarregarArquivo();
-        if (Producoes.Count > 0)
+
+        if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
         {
             Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
             return _producao;
         }
-        else return null;
+        else
+        {
+            Console.WriteLine("Não tem produções a serem localizadas");
+            return null;
+        }
     }
 
-    public void Excluir(Producao producao)
+    public void Excluir(string id)
     {
         CarregarArquivo();
-        producao.Producoes.Remove(producao);
+        if (Producoes.Count > 0) //mesmo principio da função Localizar, só que dessa vez para excluir
+        {
+            var item = Producoes.FirstOrDefault(p => p.Id.Equals(id));
+            Producoes.Remove(item);
+            Console.WriteLine("Excluido com sucesso!");
+        } else Console.WriteLine("Não tem produções a serem localizadas");
         SalvarArquivo();
     }
     public void ImpressaoRegistro()
     {
         CarregarArquivo();
-        foreach(var item in Producoes)
+        foreach(var item in Producoes)//Percorro a lista de produções e imprimo uma a uma
         {
-            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {item.Quantidade}");
+            
+            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {decimal.Parse(item.Quantidade)}");
         }
     }
 
-    string SepararPorTamanho(int inicio, int tamanho, string separada)
+    string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
         
         string aux = string.Empty;
@@ -167,13 +176,13 @@ public class Producao
         for (int i = inicio; i < auxTamanho; i++)
         {
            
-            aux += separada[i];
+            aux += aSerSeparada[i];
 
         }
         return aux;
     }
 
-    bool ValidarQuantidade(string quantidade)
+    bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
     {
         string[] aux = quantidade.Split(",");
         if (aux.Contains(","))
@@ -190,7 +199,7 @@ public class Producao
         return true;
     }
 
-    string FormatarQuantidade(string quantidade)
+    string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(','))
