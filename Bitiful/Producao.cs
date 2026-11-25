@@ -5,7 +5,7 @@ public class Producao
     public string Id { get; private set; }
     public DateOnly DataProducao { get; set; }
     public string Produto { get; set; }
-    public double Quantidade { get; set; }
+    public string Quantidade { get; set; }
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
     public string Arquivo { get; private set; } = "Producao.dat";
 
@@ -67,17 +67,21 @@ public class Producao
     {
         Producoes.Clear();
         var sr = new StreamReader(Diretorio + Arquivo);
-        if (sr.Read() == -1) return;
+        if (sr.Read() == -1)
+        {
+            sr.Close();
+            return;
+        }
         if (ArquivoExistente())
         {
-            foreach(var item in File.ReadAllLines(Diretorio + Arquivo))
+            foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
             {
                 Producao aux = new Producao();
                 aux.Id = SepararPorTamanho(0, 5, item);
                 aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
                 aux.Produto = SepararPorTamanho(15, 13, item);
-                aux.Quantidade = FormatarQuantidade((SepararPorTamanho(28, 6, item)));
-
+                aux.Quantidade = FormatarQuantidade((SepararPorTamanho(27, 6, item)));
+                Producoes.Add(aux);
 
             }
         }
@@ -117,8 +121,8 @@ public class Producao
             aux.Produto = produto;
             aux.Quantidade = FormatarQuantidade(quantidade);
             
-            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString();
-            else aux.Id = 1.ToString();
+            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
+            else aux.Id = 1.ToString().PadLeft(5,'0');
 
 
             Producoes.Add(aux);
@@ -146,7 +150,11 @@ public class Producao
     }
     public void ImpressaoRegistro()
     {
-
+        CarregarArquivo();
+        foreach(var item in Producoes)
+        {
+            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {item.Quantidade}");
+        }
     }
 
     string SepararPorTamanho(int inicio, int tamanho, string separada)
@@ -178,18 +186,18 @@ public class Producao
         return true;
     }
 
-    double FormatarQuantidade(string quantidade)
+    string FormatarQuantidade(string quantidade)
     {
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(","))
         {
             aux[1] = aux[1].PadRight(2, '0');
-            return double.Parse(aux[0] + aux[1]);
+            return (aux[0] + "," + aux[1]);
         }
         else
         {
             aux[0] = aux[0].PadLeft(3, '0');
-            return double.Parse(aux[0] + ",00");
+            return (aux[0] + ",00");
         }
 
     }

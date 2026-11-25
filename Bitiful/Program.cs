@@ -1,4 +1,4 @@
 ﻿Producao produzindo = new Producao();
 
-
-produzindo.Cadastrar("1234567891234", "500");
+produzindo.Cadastrar("123456789134", "500");
+produzindo.ImpressaoRegistro();
