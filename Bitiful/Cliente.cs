@@ -101,14 +101,15 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
 
     // Carrega Lista de clientes
-
-    internal static List<Cliente> CarregaClientes(string caminho)
+    public static List<Cliente> CarregaClientes(string caminho)
     {
+        caminho = @"C:\teste\teste.db";
+
         var clientes = new List<Cliente>();
 
         try
         {
-            if (Util.ValidarCaminhoArquivo(caminho))
+            if (Utils.ValidarCaminhoArquivo(caminho))
             {
                 foreach (var cliente in File.ReadAllLines(caminho))
                 {
@@ -118,9 +119,9 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
                         continue;
                     }
 
-                    string cpf = cliente.Substring(0, 11).TrimEnd();
+                    string cpf = cliente.Substring(0, 11).Trim();
 
-                    string nome = cliente.Substring(11, 50).TrimEnd();
+                    string nome = cliente.Substring(11, 50).Trim();
 
                     DateOnly dataNascimento = DateOnly.ParseExact(cliente.Substring(61, 10), "dd/MM/yyyy");
 
@@ -142,6 +143,33 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         }
 
         return clientes;
+    }
+
+    //Salvar lista de cliente no arquivo
+    public static void SalvarClientes(List<Cliente> clientes, string caminho)
+    {
+        caminho = @"C:\teste\teste.db";
+
+        try
+        {
+            var diretorio = Path.GetDirectoryName(caminho);
+
+            if (!Directory.Exists(diretorio))
+            {
+                Directory.CreateDirectory(diretorio);
+            }
+            using (var sw = new StreamWriter(caminho))
+            {
+                foreach (var cliente in clientes)
+                {
+                    sw.WriteLine(cliente.ToFile());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Ocorreu um erro ao salvar os contatos: {e.Message}");
+        }
     }
 
 
