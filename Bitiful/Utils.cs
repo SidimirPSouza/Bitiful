@@ -2,7 +2,7 @@
 
 internal static class Utils
 {
-    internal static bool ValidarCaminhoArquivo(string arquivo)
+    internal static bool ValidarCaminhoArquivo(string caminho)
     {
         try
         {
