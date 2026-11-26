@@ -54,17 +54,22 @@
         }
         return true;
     }// verifica se os metodos ValidaTamanhoNome e ValidaLetrasNome retornam true, caso sim ele irá retonar true se não retorna false (acredito ser o ideal criar essa função pois depois chamamos apenas ela ao invés de ter que chamar as duas acima)
-    public bool ValidaMaioridade(DateOnly dataNascimento) //se for maior de idade retorna true
+    public bool ValidaMaioridade(DateOnly dataNascimento) // Valida se é maior de idade
     {
-        if (2026 - dataNascimento.Year >= 18)
+        DateOnly dataPresente = DateOnly.FromDateTime(DateTime.Today);
+
+        DateOnly dataMaioridade = dataNascimento.AddYears(18);
+
+        if (dataPresente >= dataMaioridade)
         {
             return true;
         }
+
         return false;
     }
     public bool ValidaDataNascimento(DateOnly dataNascimento)
     {
-        if (dataNascimento < DateOnly.FromDateTime(DateTime.Today))
+        if (dataNascimento > DateOnly.FromDateTime(DateTime.Today))
         {
             return false;
         }
@@ -114,7 +119,7 @@
         }
         else
         {
-            Console.WriteLine("Não fi possivel realizar a alteração do NOME");
+            Console.WriteLine("Não foi possivel realizar a alteração do NOME");
         }
 
     } // Recebe o novo nome e chama função validar nome, se retonar true ele atribui o novo nome para a propriedade Nome
@@ -143,7 +148,7 @@
         }
 
     }
-    public ESituacao AlteraSituacao(ESituacao situacao, char novoStatus)
+    public ESituacao AlteraSituacao(ESituacao situacao)
     {
         if (situacao == (ESituacao)'A')
         {
@@ -323,13 +328,12 @@
     public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        arquivo = "Clientes.dat";
+        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(arquivo))
             {
-                foreach (var cliente in File.ReadAllLines(arquivo))
+                foreach (var cliente in File.ReadAllLines(diretorio))
                 {
                     if (cliente.Length != 93)
                     {
@@ -372,13 +376,12 @@
     public static List<Cliente> CarregaInadimplentes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        arquivo = "Risco.dat";
+        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(arquivo))
-            {
-                foreach (var cliente in File.ReadAllLines(arquivo))
+
+                foreach (var cliente in File.ReadAllLines(diretorio))
                 {
                     if (cliente.Length != 92)
                     {
@@ -392,7 +395,7 @@
 
                     clientes.Add(novoCliente);
                 }
-            }
+            
         }
         catch (Exception e)
         {
@@ -407,23 +410,16 @@
     {
         try
         {
-            bool diretorio = Utils.ValidarCaminhoArquivo(arquivo);
+            var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
 
-            if (diretorio == false)
+            using (var sw = new StreamWriter(caminho))
             {
-                Console.WriteLine("Não foi possivel salvar o arquivo.");
-            }
-            else
-            {
-                using (var sw = new StreamWriter(caminho))
+                foreach (var cliente in clientes)
                 {
-                    foreach (var cliente in clientes)
-                    {
-                        sw.WriteLine(cliente.ToFile());
-                    }
+                    sw.WriteLine(cliente.ToFile());
                 }
-                Console.WriteLine("Arquivo foi salvo com sucesso");
             }
+            Console.WriteLine("Arquivo foi salvo com sucesso");
         }
         catch (Exception e)
         {
