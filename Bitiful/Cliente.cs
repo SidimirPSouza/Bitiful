@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Data;
+using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 using System.Xml.Linq;
 
 public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly ultimaCompra, DateOnly dataCadastro, char sexo, ESituacao situacao)
@@ -13,7 +15,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
     public DateOnly UltimaCompra = DateOnly.FromDateTime(DateTime.Today);
     public DateOnly DataCadastro { get; private set; } = DateOnly.FromDateTime(DateTime.Today);
     public char Sexo { get; private set; } = char.ToUpper(sexo);
-    public ESituacao situacao { get; set; }
+    public ESituacao Situacao { get; set; }
 
     public Cliente(string cpf) : this(cpf, string.Empty, default, default, default, ' ', 0)
     {
@@ -54,12 +56,12 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
     {
         if (!ValidaLetrasNome(nome))
         {
-            throw new ArgumentException("Nome inválido.");
+            return false;
         }
 
         if (!ValidaTamanhoNome(nome))
         {
-            throw new ArgumentException("Nome maior do que permitido.");
+            return false;
         }
         return true;
 
@@ -72,6 +74,15 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
             return true;
         }
         return false;
+    }
+    public bool ValidaDataNascimento(DateOnly dataNascimento)
+    {
+        if (dataNascimento.Year > 2026)
+        {
+            return false;
+        }
+        else
+            return true;
     }
     public bool ValidaSexo(char sexo)
     {
@@ -94,6 +105,19 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         }
 
     }
+    public bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
+    {
+        Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
+
+        if (cliente is null) // se o cliente for nulo
+        {
+            return true; //retorna true se o cliente não está cadastrado
+        }
+        else
+            return false; //retorna false se ele já está cadastrado
+    }
+
+
 
     // Alteração dos dados
     public void AlteraNome(string nome)
@@ -165,18 +189,119 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         }
         return false;
     }
+    public void AdicionaClientes(List<Cliente> clientes)
+    {
+
+        string? cpf = null;
+        string? nome = null;
+        DateOnly dataNascimento;
+        DateOnly dataCadastro = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly ultimaCompra = DateOnly.FromDateTime(DateTime.Today);
+        char sexo = ' ';
+        char status;
+        bool situacaoValida = false;
+        bool dataValida = false;
+        ESituacao situacao;
+
+
+
+        while (string.IsNullOrEmpty(cpf))
+        {
+            Console.WriteLine("Digite seu CPF:");
+            cpf = Console.ReadLine();
+
+            if (!Utils.ValidarCPF(cpf))
+            {
+                Console.WriteLine("CPF digitado está incorreto.");
+                cpf = null;
+            }
+            else if (!ValidaCPFCadastrado(clientes, cpf))
+            {
+                Console.WriteLine("CPF já cadastrado no sistema.");
+                cpf = null;
+            }
+        }
+
+        while (string.IsNullOrEmpty(nome))
+        {
+            Console.WriteLine("Digite seu nome:");
+            nome = Console.ReadLine();
+
+            if (!ValidaNome(nome))
+            {
+                Console.WriteLine("O nome digitado é inválido ou supera o limite de 50 caracteres.");
+                nome = null;
+            }
+        }
+        
+        do
+        {
+            Console.WriteLine("Digite sua data de nascimento (DD/MM/AAAA):");
+            dataValida = DateOnly.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", out dataNascimento);
+            if (!dataValida || !ValidaDataNascimento(dataNascimento))
+            {
+                Console.WriteLine("Data de nascimento inválida.");
+            }
+      
+
+        } while (dataValida == false);
+
+        while (sexo == ' ')
+        {
+            Console.WriteLine("Digite seu sexo (M -Masculino/F -Feminino)");
+            char.TryParse(Console.ReadLine(), out sexo);
+            sexo = char.ToUpper(sexo);
+
+            if (!ValidaSexo(sexo))
+            {
+                Console.WriteLine("Sexo digitado está incorreto");
+                sexo = ' ';
+            }
+        }
+
+        do
+        {
+            Console.WriteLine("Digite a situação (A - Ativo | I - Inativo):");
+
+            char.TryParse(Console.ReadLine(), out status);
+
+            status = char.ToUpper(status);
+
+            situacao = (ESituacao)status;
+
+            situacaoValida = Enum.IsDefined(typeof(ESituacao), situacao);
+
+            if (!situacaoValida)
+            {
+                Console.WriteLine("Valor digitado é inválido");
+            }
+
+        } while (!situacaoValida);
+
+
+        var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, sexo, situacao);
+        clientes.Add(novoCliente);
+    }
+
+
+
+    //RemoveCliente faltando
+    //BuscaDados faltando
+    //ImpressãoPorRegistro faltando
+
 
 
     // Carrega Lista de clientes
-    public static List<Cliente> CarregaClientes(string caminho)
+    public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
+        arquivo = "Clientes.dat";
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(caminho))
+            if (Utils.ValidarCaminhoArquivo(arquivo))
             {
-                foreach (var cliente in File.ReadAllLines(caminho))
+                foreach (var cliente in File.ReadAllLines(arquivo))
                 {
                     if (cliente.Length != 92)
                     {
@@ -194,9 +319,16 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
                     DateOnly dataCadastro = DateOnly.ParseExact(cliente.Substring(81, 10), "dd/MM/yyyy");
 
-                    char sexo = cliente[91];
+                    string sexo = cliente.Substring(91, 1);
+                    char caractereSexo = char.Parse(sexo);
 
-                    var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, sexo);
+
+                    string status = cliente.Substring(92, 1);
+                    char caractereSitaucao = char.Parse(status);
+                    ESituacao situacao = (ESituacao)caractereSitaucao;
+
+
+                    var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, caractereSexo, situacao);
 
                     clientes.Add(novoCliente);
                 }
@@ -236,16 +368,16 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
     }
 
     // Carrega Inadimplentes
-    public static List<Cliente> CarregaInadimplentes(string caminho)
+    public static List<Cliente> CarregaInadimplentes(string arquivo)
     {
-
         var clientes = new List<Cliente>();
+        arquivo = "Risco.dat";
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(caminho))
+            if (Utils.ValidarCaminhoArquivo(arquivo))
             {
-                foreach (var cliente in File.ReadAllLines(caminho))
+                foreach (var cliente in File.ReadAllLines(arquivo))
                 {
                     if (cliente.Length != 92)
                     {
@@ -268,6 +400,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
         return clientes;
     }
+
 
     //Formatação para o arquivo
     public string ToFile()
