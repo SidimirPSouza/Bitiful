@@ -148,7 +148,7 @@
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados))
+            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados) is not null)
                 foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
                 {
                     //pegando o cnpj do arquivo
@@ -197,7 +197,7 @@
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados))
+            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados) is not null)
                 foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
                 {
                     string cnpjBloq = c.Trim();
@@ -231,7 +231,7 @@
         var fornecedores = new List<Fornecedor>();
         try
         {
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivo))
+            if (Utils.ValidarCaminhoArquivo(CaminhoArquivo) is not null)
                 foreach (var fornecedor in File.ReadAllLines(CaminhoArquivo))
                 {
                     //pegando os dados do arquivo
