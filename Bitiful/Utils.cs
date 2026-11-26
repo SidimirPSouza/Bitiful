@@ -2,7 +2,7 @@
 
 internal static class Utils
 {
-    internal static bool ValidarCaminhoArquivo(string arquivo)
+    internal static string? ValidarCaminhoArquivo(string arquivo)
     {
         try
         {
@@ -14,7 +14,7 @@ internal static class Utils
             if (string.IsNullOrWhiteSpace(caminhoArquivo))
             {
                 Console.WriteLine("O caminho do arquivo não deve estar vazio");
-                return false;
+                return null;
             }
             else
             {
@@ -27,11 +27,11 @@ internal static class Utils
 
                 }
             }
-            return true;
+            return $"{caminhoArquivo}";
         }catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return false;
+            return null;
         }
     }
 
@@ -69,18 +69,17 @@ internal static class Utils
         return false;
     }
 
-    //internal static bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
-    //{
+    internal static bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
+    {
+        Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
 
-    //    Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
-
-    //    if (cliente is null) // se o cliente for nulo
-    //    {
-    //        return true; //retorna true se o cliente não está cadastrado
-    //    }
-    //    else
-    //        return false; //retorna false se ele já está cadastrado
-    //}
+        if (cliente is null) // se o cliente for nulo
+        {
+            return true; //retorna true se o cliente não está cadastrado
+        }
+        else
+            return false; //retorna false se ele já está cadastrado
+    }
 
 
 
