@@ -1,11 +1,12 @@
 ﻿public class MateriaPrima
 {
-    private int Id { get; set; }
+    public int Id { get; private set; }
     public string Nome { get; set; }
     public DateOnly UltimaCompra { get; set; }
-    private DateOnly DataCadastro { get; set; }
+    public DateOnly DataCadastro { get; private set; }
     public char Situacao { get; set; }
 
+    //construtores
     public MateriaPrima(string nome)
     {
         try
@@ -20,7 +21,7 @@
             string nomeString = ConverterNomeFormatoString(Nome);
 
             string linhaParaSalvar = idString + nomeString + DataCadastro + UltimaCompra + Situacao;
-            Save(linhaParaSalvar);
+            SalvarStringNoArquivo(linhaParaSalvar);
         }
         catch (Exception e) 
         {
@@ -36,6 +37,8 @@
         UltimaCompra = ultimaCompra;
         Situacao = situacao;
     }//construtor apenas para criar um objeto que recebe os atributos resgatados do arquivo(para salvar em uma lista quando necessario)
+    
+    //metodos utilizados internamente
     private int GerarNovoId()
     {
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
@@ -62,13 +65,29 @@
             return 1;
 
     }
-    private void Save(string s)
+    private void SalvarStringNoArquivo(string s)
     {
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
         File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
     }
-    private string ConverterIdFormatoString(int id)
+    private static void SalvarObjetoNoArquivo(MateriaPrima obj)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        File.AppendAllText(caminho + arquivo, TransformarObjEmLinhaDoArquivo(obj) + Environment.NewLine);
+    }
+    private static void SalvarListaNoArquivo(List<MateriaPrima> lista)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        using (var writer = new StreamWriter(caminho+arquivo)){}
+        foreach (var item in lista)
+        {
+            SalvarObjetoNoArquivo(item);
+        }
+    }
+    private static string ConverterIdFormatoString(int id)
     {
         switch (id)
         {
@@ -85,7 +104,7 @@
         }
 
     }
-    private string ConverterNomeFormatoString(string nome)
+    private static string ConverterNomeFormatoString(string nome)
     {
         string nomeLimitado20;
         if (nome.Length > 20)
@@ -102,21 +121,35 @@
         return nomeFormatado;       
 
     }
-    public override string ToString()
+    private static MateriaPrima TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
     {
-        return $"""
+        int id = int.Parse(linhaAtual.Substring(2, 4));
+        int contAux = 0;
 
-            Id: {ConverterIdFormatoString(Id)}
-            Nome: {Nome}
-            UltimaCompra: {UltimaCompra}
-            DataCadastro: {DataCadastro}
-            Situacao: {Situacao}
+        for (int j = 0; j < 20; j++)
+        {
+            if (linhaAtual[j + 6] == '*')
+                contAux++;
+            else
+                break;
+        }
+        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+        char situacao = linhaAtual[linhaAtual.Length - 1];
 
-            """;
+        return new(id, nome, dataCadastro, UltimaCompra, situacao);
+
+    }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
+    private static string TransformarObjEmLinhaDoArquivo(MateriaPrima obj)
+    {
+        return $"{ConverterIdFormatoString(obj.Id)}{ConverterNomeFormatoString(obj.Nome)}{obj.DataCadastro}{obj.UltimaCompra}{obj.Situacao}";
     }
+
+    //metodos para utilizar externamente independentes
     public static List<MateriaPrima> buscarTodosRegistros()
     {
-        List<MateriaPrima> lista = new ();
+        List<MateriaPrima> lista = new();
 
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
@@ -126,12 +159,13 @@
 
             if (linhas.Length > 0)
             {
-                foreach( string linhaAtual in linhas)
-                {                    
+                foreach (string linhaAtual in linhas)
+                {
                     lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                 }
-                
-            }else
+
+            }
+            else
                 return new List<MateriaPrima>();
 
             return lista;
@@ -140,7 +174,7 @@
         }
         else
             return new List<MateriaPrima>();
-    }  
+    }
     public static List<MateriaPrima> buscarRegistrosAtivos()
     {
         List<MateriaPrima> lista = new();
@@ -156,11 +190,11 @@
                 foreach (string linhaAtual in linhas)
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
-                    if(situacao == 'A')
-                    {                        
+                    if (situacao == 'A')
+                    {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                     }
-                    
+
                 }
 
             }
@@ -191,7 +225,7 @@
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
                     if (situacao == 'I')
-                    {                        
+                    {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                     }
                 }
@@ -222,7 +256,7 @@
             {
                 foreach (string linhaAtual in linhas)
                 {
-                    if(idInt == int.Parse(linhaAtual.Substring(2, 4)))
+                    if (idInt == int.Parse(linhaAtual.Substring(2, 4)))
                     {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                         break;
@@ -258,7 +292,7 @@
                 {
                     IdString = IdString.ToUpper();
                     string idFormat = linhaAtual.Substring(0, 6);
-                    
+
                     if (idFormat == IdString)
                     {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
@@ -280,27 +314,110 @@
 
 
     }
-    private static MateriaPrima TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
+    public static bool EditarNomePorId(int id, string nome)
     {
-        int id = int.Parse(linhaAtual.Substring(2, 4));
-        int contAux = 0;
+        bool editou = false;
 
-        for (int j = 0; j < 20; j++)
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach(MateriaPrima item in lista)
         {
-            if (linhaAtual[j + 6] == '*')
-                contAux++;
-            else
+            if(item.Id == id)
+            {
+                item.Nome = nome;
+                editou = true;
                 break;
+            }
         }
-        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
-        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
-        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
-        char situacao = linhaAtual[linhaAtual.Length - 1];
 
-        return new(id, nome, dataCadastro, UltimaCompra, situacao);
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+        
+    }
+    public static bool EditarUltimaCompraPorId(int id, DateOnly dataUltimaCompra)
+    {
+        bool editou = false;
 
-    }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
+        List<MateriaPrima> lista = buscarTodosRegistros();
 
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.UltimaCompra = dataUltimaCompra;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+
+    }
+    public static void InativarItem(int id)
+    {
+        bool editou = false;
+
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.Situacao = 'I';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
+
+    }
+    public static void AtivarItem(int id)
+    {
+        bool editou = false;
+
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.Situacao = 'A';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
+
+    }
+
+    //override ToString()
+    public override string ToString()
+    {
+        return $"""
+
+            Id: {ConverterIdFormatoString(Id)}
+            Nome: {Nome}
+            UltimaCompra: {UltimaCompra}
+            DataCadastro: {DataCadastro}
+            Situacao: {Situacao}
+
+            """;
+    }
 }
 
 
