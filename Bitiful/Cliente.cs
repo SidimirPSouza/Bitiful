@@ -1,4 +1,4 @@
-﻿public class Cliente(string cpf, string nome, DateOnly dataNascimento, char sexo, ESituacao situacao)
+﻿public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly ultimaCompra, DateOnly dataCadastro, char sexo, ESituacao situacao)
 {
     public string Cpf { get; private set; } = cpf;
     public string Nome { get; private set; } = nome;
@@ -8,7 +8,7 @@
     public char Sexo { get; private set; } = char.ToUpper(sexo);
     public ESituacao Situacao { get; set; }
 
-    public Cliente(string cpf) : this(cpf, string.Empty, default, ' ', 0)
+    public Cliente(string cpf) : this(cpf, string.Empty, default, default, default, ' ', 0)
     {
         this.Cpf = cpf;
     }
@@ -18,6 +18,7 @@
 
     public bool ValidaLetrasNome(string nome)
     {
+
         if (string.IsNullOrEmpty(nome))
         {
             return false;
@@ -54,6 +55,8 @@
             return false;
         }
         return true;
+
+
     }// verifica se os metodos ValidaTamanhoNome e ValidaLetrasNome retornam true, caso sim ele irá retonar true se não retorna false (acredito ser o ideal criar essa função pois depois chamamos apenas ela ao invés de ter que chamar as duas acima)
     public bool ValidaMaioridade(DateOnly dataNascimento) //se for maior de idade retorna true
     {
@@ -65,7 +68,7 @@
     }
     public bool ValidaDataNascimento(DateOnly dataNascimento)
     {
-        if (dataNascimento < DateOnly.FromDateTime(DateTime.Today))
+        if (dataNascimento.Year > 2026)
         {
             return false;
         }
@@ -91,6 +94,7 @@
         {
             return situacao = (ESituacao)'I';
         }
+
     }
     public bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
     {
@@ -105,13 +109,13 @@
     }
 
 
+
     //ALTERAÇÃO DE DADOS
     public void AlteraNome(string nome)
     {
         if (ValidaNome(nome))
         {
             this.Nome = nome;
-            Console.WriteLine($"Nome foi alterado com sucesso para {nome}");
         }
         else
         {
@@ -124,7 +128,6 @@
         if (ValidaDataNascimento(dataNascimento))
         {
             this.DataNascimento = dataNascimento;
-            Console.WriteLine($"Nome data de nascimento foi alterada com sucesso para {dataNascimento}");
         }
         else
         {
@@ -136,7 +139,6 @@
         if (ValidaSexo(sexo))
         {
             this.Sexo = char.ToUpper(sexo);
-            Console.WriteLine($"Sexo foi alterado com sucesso para:{sexo}");
         }
         else
         {
@@ -156,6 +158,7 @@
         }
 
     } 
+
 
     //ADIÇÃO E REMOÇÃO 
     public bool AdicionaInadimplentes(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf)
@@ -232,7 +235,6 @@
             if (!dataValida || !ValidaDataNascimento(dataNascimento))
             {
                 Console.WriteLine("Data de nascimento inválida.");
-                dataValida = false;
             }
 
 
@@ -271,7 +273,7 @@
         } while (!situacaoValida);
 
 
-        var novoCliente = new Cliente(cpf, nome, dataNascimento, sexo, situacao);
+        var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, sexo, situacao);
         clientes.Add(novoCliente);
     }// Adiciona cliente na lista de clientes
     public bool RemoveCliente(List<Cliente> clientes, string cpf) // Remove serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
@@ -292,6 +294,8 @@
         return false;
     }
 
+
+
     // BUSCA
     public Cliente? BuscaCliente(List<Cliente> clientes, string cpf) // Serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
     {
@@ -307,18 +311,7 @@
             return null;
         }
     }
-    void ExibirCliente(Cliente cliente)
-    {
-        Console.WriteLine("======================================");
-        Console.WriteLine($"CPF: {cliente.Cpf}");
-        Console.WriteLine($"Nome: {cliente.Nome}");
-        Console.WriteLine($"Nascimento: {cliente.DataNascimento:dd/MM/yyyy}");
-        Console.WriteLine($"Última compra: {cliente.UltimaCompra:dd/MM/yyyy}");
-        Console.WriteLine($"Cadastro: {cliente.DataCadastro:dd/MM/yyyy}");
-        Console.WriteLine($"Sexo: {cliente.Sexo}");
-        Console.WriteLine($"Situação: {cliente.Situacao}");
-        Console.WriteLine("======================================");
-    } // Necessario passar o parametro de cliente que deseja exibir
+
 
     // LISTAS
     public static List<Cliente> CarregaClientes(string arquivo)
@@ -332,7 +325,7 @@
             {
                 foreach (var cliente in File.ReadAllLines(arquivo))
                 {
-                    if (cliente.Length != 93)
+                    if (cliente.Length != 92)
                     {
                         Console.WriteLine("Registro inválido.");
                         continue;
@@ -357,7 +350,7 @@
                     ESituacao situacao = (ESituacao)caractereSitaucao;
 
 
-                    var novoCliente = new Cliente(cpf, nome, dataNascimento, caractereSexo, situacao);
+                    var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, caractereSexo, situacao);
 
                     clientes.Add(novoCliente);
                 }
@@ -404,25 +397,22 @@
     }
 
     //SALVAR LISTA
-    public static void SalvarListas(List<Cliente> clientes, string caminho,string arquivo) // Serve para qualquer lista basta trocar a lista no parametro
+    public static void SalvarListas(List<Cliente> clientes, string caminho) // Serve para qualquer lista basta trocar a lista no parametro
     {
         try
         {
-            bool diretorio = Utils.ValidarCaminhoArquivo(arquivo);
+            var diretorio = Path.GetDirectoryName(caminho);
 
-            if (diretorio == false)
+            if (!Directory.Exists(diretorio))
             {
-                Console.WriteLine("Não foi possivel salvar o arquivo.");
+                Directory.CreateDirectory(diretorio);
             }
-            else { 
             using (var sw = new StreamWriter(caminho))
             {
                 foreach (var cliente in clientes)
                 {
                     sw.WriteLine(cliente.ToFile());
                 }
-            }
-                Console.WriteLine("Arquivo foi salvo com sucesso");
             }
         }
         catch (Exception e)
