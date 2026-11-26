@@ -1,12 +1,12 @@
 ﻿using System.Text.RegularExpressions;
-
+var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
 internal static class Utils
 {
     internal static bool ValidarCaminhoArquivo(string arquivo)
     {
         try
         {
-            var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+            //var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
             if (!Directory.Exists(caminho))
                 Directory.CreateDirectory(caminho);
 
