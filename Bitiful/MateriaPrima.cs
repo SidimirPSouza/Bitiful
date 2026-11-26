@@ -28,7 +28,7 @@
         }            
         
     }// ao criar a materia prima, ela ja vai gerar o caminho e o arquivo caso não exista, gerar o proximo id e salvar no arquivo automaticamente.
-    private MateriaPrima(int id, string nome, DateOnly dataCadastro, DateOnly ultimaCompra, char situacao)
+    public MateriaPrima(int id, string nome, DateOnly dataCadastro, DateOnly ultimaCompra, char situacao)
     {
         Id = id;
         Nome = nome;
@@ -127,8 +127,25 @@
             if (linhas.Length > 0)
             {
                 foreach( string linhaAtual in linhas)
-                {                    
-                    lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                {
+                    int id = int.Parse(linhaAtual.Substring(2, 4));
+                    int contAux = 0;
+
+                    for (int j = 0; j < 20; j++)
+                    {
+                        if (linhaAtual[j + 6] == '*')
+                            contAux++;
+                        else
+                            break;
+                    }
+                    string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                    DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                    DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+
+                    //teste
+                    MateriaPrima mp = new(id,nome, dataCadastro, UltimaCompra, situacao);
+                    lista.Add(mp);
                 }
                 
             }else
@@ -140,7 +157,7 @@
         }
         else
             return new List<MateriaPrima>();
-    }  
+    }
     public static List<MateriaPrima> buscarRegistrosAtivos()
     {
         List<MateriaPrima> lista = new();
@@ -157,8 +174,24 @@
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
                     if(situacao == 'A')
-                    {                        
-                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                    {
+                        int id = int.Parse(linhaAtual.Substring(2, 4));
+                        int contAux = 0;
+
+                        for (int j = 0; j < 20; j++)
+                        {
+                            if (linhaAtual[j + 6] == '*')
+                                contAux++;
+                            else
+                                break;
+                        }
+                        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+
+                        MateriaPrima mp = new(id, nome, dataCadastro, UltimaCompra, situacao);
+                        lista.Add(mp);
+
                     }
                     
                 }
@@ -191,9 +224,26 @@
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
                     if (situacao == 'I')
-                    {                        
-                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                    {
+                        int id = int.Parse(linhaAtual.Substring(2, 4));
+                        int contAux = 0;
+
+                        for (int j = 0; j < 20; j++)
+                        {
+                            if (linhaAtual[j + 6] == '*')
+                                contAux++;
+                            else
+                                break;
+                        }
+                        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+
+                        MateriaPrima mp = new(id, nome, dataCadastro, UltimaCompra, situacao);
+                        lista.Add(mp);
+
                     }
+
                 }
 
             }
@@ -222,9 +272,26 @@
             {
                 foreach (string linhaAtual in linhas)
                 {
-                    if(idInt == int.Parse(linhaAtual.Substring(2, 4)))
+                    int id = int.Parse(linhaAtual.Substring(2, 4));
+                    int contAux = 0;
+
+                    for (int j = 0; j < 20; j++)
                     {
-                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                        if (linhaAtual[j + 6] == '*')
+                            contAux++;
+                        else
+                            break;
+                    }
+                    string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                    DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                    DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+
+                    //teste
+                    MateriaPrima mp = new(id, nome, dataCadastro, UltimaCompra, situacao);
+                    if(mp.Id == id)
+                    {
+                        lista.Add(mp);
                         break;
                     }
 
@@ -240,6 +307,7 @@
         }
         else
             return lista;
+
 
     }
     public static List<MateriaPrima> LocalizarPorChaveString(string IdString)
@@ -257,11 +325,27 @@
                 foreach (string linhaAtual in linhas)
                 {
                     IdString = IdString.ToUpper();
+                    int id = int.Parse(linhaAtual.Substring(2, 4));
                     string idFormat = linhaAtual.Substring(0, 6);
-                    
+                    int contAux = 0;
+
+                    for (int j = 0; j < 20; j++)
+                    {
+                        if (linhaAtual[j + 6] == '*')
+                            contAux++;
+                        else
+                            break;
+                    }
+                    string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+                    DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+                    DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+
+                    //teste
+                    MateriaPrima mp = new(id, nome, dataCadastro, UltimaCompra, situacao);
                     if (idFormat == IdString)
                     {
-                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                        lista.Add(mp);
                         break;
                     }
 
@@ -280,26 +364,7 @@
 
 
     }
-    private static MateriaPrima TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
-    {
-        int id = int.Parse(linhaAtual.Substring(2, 4));
-        int contAux = 0;
 
-        for (int j = 0; j < 20; j++)
-        {
-            if (linhaAtual[j + 6] == '*')
-                contAux++;
-            else
-                break;
-        }
-        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
-        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
-        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
-        char situacao = linhaAtual[linhaAtual.Length - 1];
-
-        return new(id, nome, dataCadastro, UltimaCompra, situacao);
-
-    }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
 
 }
 
