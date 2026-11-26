@@ -125,6 +125,7 @@
     // Retorna a quantidade de itens cadastrados.
     public int QuantidadeDeItens()
     {
+
         return listaDeCompra.Count;
     }
 }
