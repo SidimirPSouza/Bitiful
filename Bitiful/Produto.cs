@@ -19,9 +19,11 @@ public class Produto
         UltimaVenda = DataCadastro;
         Situacao = 'A';
 
+        string valorVendaString = ConverterValorVendaFormatoString(ValorVenda);
+
         string nomeString = ConverterNomeFormatoString(Nome);
 
-        string linhaParaSalvar = CodigoDeBarras + nomeString + ValorVenda + DataCadastro + UltimaVenda + Situacao;
+        string linhaParaSalvar = CodigoDeBarras + nomeString + valorVendaString + DataCadastro + UltimaVenda + Situacao;
 
         SalvarStringNoArquivo(linhaParaSalvar);
 
@@ -64,6 +66,49 @@ public class Produto
         nomeFormatado = nomeFormatado + nomeLimitado20;
         return nomeFormatado;
 
+    }
+    private static string ConverterValorVendaFormatoString(decimal valorVenda)
+    {
+        bool temVirgula = false;
+        string valorVendaString = valorVenda.ToString();
+        for (int i = 0; i < valorVendaString.Length; i++)
+        {
+            if (valorVendaString[i] == ',')
+            {
+                temVirgula = true;
+                break;
+            }
+        }
+        if(temVirgula == false)
+            valorVendaString += ",00";
+        string[] valorVendaSplit = valorVendaString.Split(',');
+        string antes = valorVendaSplit[0];
+        string depois = valorVendaSplit[1];
+
+        switch (antes.Length)
+        {
+            case 1:
+                antes = $"00{antes}";
+                break;
+            case 2:
+                antes = $"0{antes}";
+                break;
+            case 3:
+                antes = $"{antes}";
+                break;
+        }
+
+        switch (depois.Length)
+        {
+            case 1:
+                depois = $"{depois}0";
+                break;
+            case 2:
+                depois = $"{depois}";
+                break;
+        }
+
+        return $"{antes},{depois}";
     }
 
     //metodos para utilizar externamente independentes
