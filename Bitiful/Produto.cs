@@ -34,6 +34,19 @@
     //metodos para utilizar externamente independentes
 
     //override ToString()
+    public override string ToString()
+    {
+        return $"""
+
+            Id: {CodigoDeBarras}
+            Nome: {Nome}
+            Valor de venda: R${ValorVenda}
+            Ultima venda: {UltimaVenda}
+            Data de cadastro: {DataCadastro}
+            Situacao: {Situacao}
+
+            """;
+    }
 
 }
 
