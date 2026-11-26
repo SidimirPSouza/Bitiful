@@ -39,5 +39,5 @@ if (compra.FinalizarCompra())
 }
 else
 {
-    Console.WriteLine("Não foi possível finalizar a compra.");
+    Console.WriteLine("Não foi possível finalizar a compra");
 }
