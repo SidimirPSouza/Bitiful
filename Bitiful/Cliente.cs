@@ -328,13 +328,12 @@
     public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        arquivo = "Clientes.dat";
+        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(arquivo))
             {
-                foreach (var cliente in File.ReadAllLines(arquivo))
+                foreach (var cliente in File.ReadAllLines(diretorio))
                 {
                     if (cliente.Length != 93)
                     {
@@ -377,13 +376,12 @@
     public static List<Cliente> CarregaInadimplentes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        arquivo = "Risco.dat";
+        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
 
         try
         {
-            if (Utils.ValidarCaminhoArquivo(arquivo))
-            {
-                foreach (var cliente in File.ReadAllLines(arquivo))
+
+                foreach (var cliente in File.ReadAllLines(diretorio))
                 {
                     if (cliente.Length != 92)
                     {
@@ -397,7 +395,7 @@
 
                     clientes.Add(novoCliente);
                 }
-            }
+            
         }
         catch (Exception e)
         {
