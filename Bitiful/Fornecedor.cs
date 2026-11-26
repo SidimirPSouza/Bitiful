@@ -97,17 +97,19 @@
                 //cadastrar cnpj
                 Console.Write("Informe o CNPJ do Fornecedor: ");
                 cnpj = Console.ReadLine();
-
+                
                 if (!Utils.ValidarCNPJ(cnpj))
                 {
                     Console.WriteLine("CNPJ digitado está incorreto.");
                     cnpj = null;
                 }
+                
                 else if (!ValidaCNPJCadastrado(cnpj, fornecedores))
                 {
                     Console.WriteLine("CNPJ já cadastrado no sistema.");
                     cnpj = null;
                 }
+                
             }
 
             while (string.IsNullOrEmpty(razaoSocial))
@@ -248,8 +250,10 @@
             if (fornecedor == null)
                 return false;
 
+            //verifica se consegue remover o cnpj do arquivo
             if (cnpjsBloqueados.Remove(fornecedor.Cnpj))
             {
+                //escreve a lista no arquivo
                 File.WriteAllLines(CaminhoArquivoBloqueados, cnpjsBloqueados);
                 return true;
             }
@@ -302,11 +306,6 @@
     {
         try
         {
-            var diretorio = Path.GetDirectoryName(CaminhoArquivo);
-
-            if (!Directory.Exists(diretorio))
-                Directory.CreateDirectory(diretorio);
-
             var sw = new StreamWriter(CaminhoArquivo);
 
             //passando pela lista de fornecedores e escrevendo em cada linha no arquivo
@@ -329,7 +328,8 @@
             $"\nRazao Social: {RazaoSocial}" +
             $"\nData Abertura: {DataAbertura}" +
             $"\nData Ultima Compra: {DataUltimaCompra}" +
-            $"\nData Cadastro: {DataCadastro}";
+            $"\nData Cadastro: {DataCadastro}" +
+            $"\nSituação: {Situacao}";
     }
 
     public string ToFileString()
