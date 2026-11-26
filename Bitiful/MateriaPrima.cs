@@ -345,6 +345,31 @@
             return false;
         
     }
+    public static bool EditarUltimaCompraPorId(int id, DateOnly dataUltimaCompra)
+    {
+        bool editou = false;
+
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.UltimaCompra = dataUltimaCompra;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+
+    }
 }
 
 
