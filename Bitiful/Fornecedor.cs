@@ -148,15 +148,15 @@
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados) is not null)
-                foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
-                {
-                    //pegando o cnpj do arquivo
-                    string cnpjBloq = c.Trim();
 
-                    //adicionando na lista o cnpj inativo
-                    cnpjsBloqueados.Add(cnpjBloq);
-                }
+            foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
+            {
+                //pegando o cnpj do arquivo
+                string cnpjBloq = c.Trim();
+
+                //adicionando na lista o cnpj inativo
+                cnpjsBloqueados.Add(cnpjBloq);
+            }
 
             //pegando o fornecedor da lista de fornecedores
             var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
@@ -197,12 +197,12 @@
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados) is not null)
-                foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
-                {
-                    string cnpjBloq = c.Trim();
-                    cnpjsBloqueados.Add(cnpjBloq);
-                }
+
+            foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
+            {
+                string cnpjBloq = c.Trim();
+                cnpjsBloqueados.Add(cnpjBloq);
+            }
 
             var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
 
@@ -231,23 +231,22 @@
         var fornecedores = new List<Fornecedor>();
         try
         {
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivo) is not null)
-                foreach (var fornecedor in File.ReadAllLines(CaminhoArquivo))
-                {
-                    //pegando os dados do arquivo
-                    string cnpj = fornecedor.Substring(0, 14).Trim();
-                    string razaoSocial = fornecedor.Substring(14, 50).Trim();
-                    DateOnly dataAbertura = DateOnly.ParseExact(fornecedor.Substring(64, 10), "dd/MM/yyyy");
-                    DateOnly dataUltimaCompra = DateOnly.ParseExact(fornecedor.Substring(74, 10), "dd/MM/yyyy");
-                    DateOnly dataCadastro = DateOnly.ParseExact(fornecedor.Substring(84, 10), "dd/MM/yyyy");
-                    ESituacao situacao = Enum.Parse<ESituacao>(fornecedor.Substring(94).Trim());
+            foreach (var fornecedor in File.ReadAllLines(CaminhoArquivo))
+            {
+                //pegando os dados do arquivo
+                string cnpj = fornecedor.Substring(0, 14).Trim();
+                string razaoSocial = fornecedor.Substring(14, 50).Trim();
+                DateOnly dataAbertura = DateOnly.ParseExact(fornecedor.Substring(64, 10), "dd/MM/yyyy");
+                DateOnly dataUltimaCompra = DateOnly.ParseExact(fornecedor.Substring(74, 10), "dd/MM/yyyy");
+                DateOnly dataCadastro = DateOnly.ParseExact(fornecedor.Substring(84, 10), "dd/MM/yyyy");
+                ESituacao situacao = Enum.Parse<ESituacao>(fornecedor.Substring(94).Trim());
 
-                    //criando um objeto Fornecedor com os dados do arquivo
-                    var novoFornecedor = new Fornecedor(cnpj, razaoSocial, dataAbertura, dataUltimaCompra, dataCadastro, situacao);
-                    //adicionando na lista o novo objeto
-                    fornecedores.Add(novoFornecedor);
+                //criando um objeto Fornecedor com os dados do arquivo
+                var novoFornecedor = new Fornecedor(cnpj, razaoSocial, dataAbertura, dataUltimaCompra, dataCadastro, situacao);
+                //adicionando na lista o novo objeto
+                fornecedores.Add(novoFornecedor);
 
-                }
+            }
         }
         catch (Exception e)
         {
@@ -263,10 +262,6 @@
     {
         try
         {
-            var diretorio = Path.GetDirectoryName(CaminhoArquivo);
-
-            if (!Directory.Exists(diretorio))
-                Directory.CreateDirectory(diretorio);
 
             var sw = new StreamWriter(CaminhoArquivo);
 
