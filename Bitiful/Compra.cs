@@ -1,9 +1,9 @@
 ﻿public class Compra
 {
-    public int Id { get; set; }
-    public DateOnly DataCompra { get; set; }
-    public string CnpjFornecedor { get; set; }
-    public decimal ValorTotal { get; set; }
+    public int Id { get; private set; }
+    public DateOnly DataCompra { get; private set; }
+    public string CnpjFornecedor { get; private set; }
+    public decimal ValorTotal { get; private set; }
 
 
     //Construtor que toda vez que um objeto é criado ele ja pega a data
@@ -23,14 +23,7 @@
         }
 
         listaDeCompra.Add(itemCompra);
-
+        
         return true;
     }
-
-    public IReadOnlyList<ItemCompra> ObterItens()
-    {
-        return listaDeCompra.AsReadOnly();
-    }
-
- 
 }
