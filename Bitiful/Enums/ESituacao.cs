@@ -2,7 +2,7 @@
 public enum ESituacao
 {
     Ativo = 'A',
-    Inatino = 'I'
+    Inativo = 'I'
 }
 
 
