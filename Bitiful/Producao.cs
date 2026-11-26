@@ -8,6 +8,7 @@ public class Producao
     public string Quantidade { get; set; }
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
     public string Arquivo { get; private set; } = "Producao.dat";
+    public ItemProducao ItemProd { get; set; }
     public List<Producao> Producoes = new List<Producao>();
     public bool DiretorioExistente() //Checando se o diretorio existe e criando ele
     {
@@ -175,6 +176,7 @@ public class Producao
     }
     bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
     {
+        if (decimal.Parse(quantidade) < 0) return false;
         string[] aux = quantidade.Split(",");
         if (aux.Contains(","))
         {
