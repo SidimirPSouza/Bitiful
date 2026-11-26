@@ -9,9 +9,6 @@ public class Producao
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
     public string Arquivo { get; private set; } = "Producao.dat";
     public List<Producao> Producoes = new List<Producao>();
-
-
-    
     public bool DiretorioExistente() //Checando se o diretorio existe e criando ele
     {
         if (Directory.Exists(Diretorio))
@@ -60,7 +57,6 @@ public class Producao
         }
 
     }
-
     public void CarregarArquivo()//carregando a lista com o arquivo
     {
         Producoes.Clear();
@@ -86,7 +82,6 @@ public class Producao
         }
         sr.Close();
     }
-
     public void SalvarArquivo()//salvando a lista no arquivo
     {
         if (ArquivoExistente())
@@ -129,7 +124,6 @@ public class Producao
         }
         SalvarArquivo();
     }
-
     public Producao? Localizar(string id)
     {
         
@@ -146,7 +140,6 @@ public class Producao
             return null;
         }
     }
-
     public void Excluir(string id)
     {
         CarregarArquivo();
@@ -167,7 +160,6 @@ public class Producao
             Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {decimal.Parse(item.Quantidade)}");
         }
     }
-
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
         
@@ -181,7 +173,6 @@ public class Producao
         }
         return aux;
     }
-
     bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
     {
         string[] aux = quantidade.Split(",");
@@ -198,7 +189,6 @@ public class Producao
         
         return true;
     }
-
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
         string[] aux = quantidade.Split(",");
