@@ -2,7 +2,7 @@
 
 internal static class Utils
 {
-    internal static string? ValidarCaminhoArquivo(string arquivo)
+    internal static bool ValidarCaminhoArquivo(string arquivo)
     {
         try
         {
@@ -14,7 +14,7 @@ internal static class Utils
             if (string.IsNullOrWhiteSpace(caminhoArquivo))
             {
                 Console.WriteLine("O caminho do arquivo não deve estar vazio");
-                return null;
+                return false;
             }
             else
             {
@@ -27,11 +27,11 @@ internal static class Utils
 
                 }
             }
-            return $"{caminhoArquivo}";
+            return caminhoArquivo;
         }catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return null;
+            return false;
         }
     }
 
@@ -71,15 +71,16 @@ internal static class Utils
 
     internal static bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
     {
+
         Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
 
-        if (cliente is null) // se o cliente for nulo
-        {
-            return true; //retorna true se o cliente não está cadastrado
-        }
-        else
-            return false; //retorna false se ele já está cadastrado
-    }
+    //    if (cliente is null) // se o cliente for nulo
+    //    {
+    //        return true; //retorna true se o cliente não está cadastrado
+    //    }
+    //    else
+    //        return false; //retorna false se ele já está cadastrado
+    //}
 
 
 
@@ -128,7 +129,69 @@ internal static class Utils
 
     //internal static bool ValidarData(string cpf)
 
-    //internal navegarLista
+    internal static char CreateMenu(List<string> options)
+    {
+        foreach (string item in options)
+            Console.Write(item);
+        try
+        {
+            Console.Write("Informe a opção desejada: ");
+            return char.TryParse(Console.ReadLine(), out char option) ? option : '\0';
+        }
+        catch
+        {
+            return '\0';
+        }
+    }
+
+    internal static void ShowInformations<T>(List<T> models)
+    {
+        if (models.Count.Equals(0))
+        {
+            Console.WriteLine("Nenhum contato encontrado!");
+            Console.ReadKey();
+            return;
+        }
+
+        int index = 0;
+        bool showing = true;
+
+        while (showing)
+        {
+            var options = new List<string> { "1 - Primeiro ", "2 - Anterior ", "3 - Próximo ", "4 - Último ", "0 - Sair\n" };
+
+            Console.Clear();
+            Console.WriteLine($"Item {index + 1} de {models.Count}");
+            Console.WriteLine(models[index] + "\n");
+
+            switch (Utils.CreateMenu(options))
+            {
+                case '1':
+                    index = 0;
+                    break;
+
+                case '2':
+                    if (index > 0) index--;
+                    break;
+
+                case '3':
+                    if (index < models.Count - 1) index++;
+                    break;
+
+                case '4':
+                    index = models.Count - 1;
+                    break;
+
+                case '0':
+                    showing = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Opção inválida!");
+                    break;
+            }
+        }
+    }
     //internal ProcurarNaLista
 }
 
