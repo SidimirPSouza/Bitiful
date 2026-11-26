@@ -110,6 +110,7 @@ public class Producao
         }
         CarregarArquivo();
         Producao aux = new Producao();
+        ItemProducao auxItemProd = new ItemProducao();
         if (ArquivoExistente())
         {
             aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
@@ -119,6 +120,8 @@ public class Producao
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
             else aux.Id = 1.ToString().PadLeft(5,'0');
+
+            
 
             Producoes.Add(aux);
             Console.WriteLine("Cadastrado com sucesso!");
@@ -133,6 +136,11 @@ public class Producao
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
         {
             Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
+            ItemProducao auxItemProd = new ItemProducao();
+
+            Console.WriteLine($"ID:{int.Parse(_producao.Id)}\tData de produção:{_producao.DataProducao}\tProduto:{_producao.Produto}\tQuantidade: {decimal.Parse(_producao.Quantidade)}");
+            auxItemProd.ImprimirMateriaPrima(_producao.Id);
+
             return _producao;
         }
         else

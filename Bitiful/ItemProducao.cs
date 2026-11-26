@@ -6,7 +6,7 @@
     public string QuantidadeMateriaPrima { get; set; }
 
     public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
-    public string Arquivo { get; private set; } = "Producao.dat";
+    public string Arquivo { get; private set; } = "ItemProducao.dat";
     public List<ItemProducao> ListaItemProducao = new List<ItemProducao>();
     public bool DiretorioExistente() //Checando se o diretorio existe e criando ele
     {
@@ -59,18 +59,19 @@
     public void CarregarArquivo()//carregando a lista com o arquivo
     {
         ListaItemProducao.Clear();
-        var sr = new StreamReader(Diretorio + Arquivo);
-        if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
-        {
-            sr.Close();
-            return;
-        }
+        
         if (ArquivoExistente())
         {
+            var sr = new StreamReader(Diretorio + Arquivo);
+            if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
+            {
+                sr.Close();
+                return;
+            }
             foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
             {
                 ItemProducao aux = new ItemProducao();
-                aux.IdProducao = SepararPorTamanho(0, 5, item);
+                aux.IdProducao = SepararPorTamanho(0, 5, item).ToUpper();
                 aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
                 aux.MatPrima = SepararPorTamanho(15, 6, item);
                 string auxiliar = SepararPorTamanho(21, 6, item);
@@ -78,8 +79,9 @@
                 ListaItemProducao.Add(aux);
 
             }
+            sr.Close();
         }
-        sr.Close();
+        
     }
     public void SalvarArquivo()//salvando a lista no arquivo
     {
@@ -89,7 +91,7 @@
 
             foreach (var item in ListaItemProducao)
             {
-                sw.WriteLine(item.IdProducao + item.DataProducao + item.MatPrima + item.QuantidadeMateriaPrima);
+                sw.WriteLine(item.IdProducao.ToUpper() + item.DataProducao + item.MatPrima + item.QuantidadeMateriaPrima);
             }
             sw.Close();
         }
@@ -111,7 +113,7 @@
 
     public void ListarMateriaPrima(string idProducao, string materiaPrima, string quantidade)
     {
-        if(materiaPrima.Length != 6 && materiaPrima.Contains("mp".ToUpper()))
+        if(materiaPrima.Length != 6 && !materiaPrima.Contains("mp".ToUpper()))
         {
             Console.WriteLine("Materia prima inválida");
             return;
@@ -128,19 +130,22 @@
         CarregarArquivo();
 
         ItemProducao aux = new ItemProducao();
-        aux.IdProducao = idProducao;
+        aux.IdProducao = idProducao.ToUpper();
         aux.MatPrima = materiaPrima;
-        aux.QuantidadeMateriaPrima = quantidade;
+        aux.QuantidadeMateriaPrima = FormatarQuantidade(quantidade);
+        ListaItemProducao.Add(aux);
+        SalvarArquivo();
     }
     public void ImprimirMateriaPrima(string idProducao)
     {
+        CarregarArquivo();
         List<ItemProducao> ListaImpressa = new List<ItemProducao>();
-
         ListaImpressa = ListaItemProducao.FindAll(p => p.IdProducao == idProducao);
-        for (int i = 0; i  < ListaImpressa.Count; i++)
+        foreach(var item in ListaImpressa)
         {
-            Console.WriteLine($"ID da matéria-prima: {ListaImpressa[i].MatPrima}\tQuantidade Utilizada: {ListaImpressa[i].QuantidadeMateriaPrima}");
+            Console.WriteLine($"ID da matéria-prima: {item.MatPrima}\tQuantidade Utilizada: {decimal.Parse(item.QuantidadeMateriaPrima)}");
         }
+
     }
 
     bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
