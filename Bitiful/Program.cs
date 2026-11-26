@@ -1,5 +1,5 @@
 ﻿
-List<MateriaPrima> lista = MateriaPrima.buscarRegistrosInativos();
+List<MateriaPrima> lista = MateriaPrima.LocalizarPorChaveInt(4);
 
 foreach (MateriaPrima item in lista)
 {
