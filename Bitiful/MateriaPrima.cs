@@ -1,9 +1,9 @@
 ﻿public class MateriaPrima
 {
-    private int Id { get; set; }
+    public int Id { get; private set; }
     public string Nome { get; set; }
     public DateOnly UltimaCompra { get; set; }
-    private DateOnly DataCadastro { get; set; }
+    public DateOnly DataCadastro { get; private set; }
     public char Situacao { get; set; }
 
     public MateriaPrima(string nome)
@@ -20,7 +20,7 @@
             string nomeString = ConverterNomeFormatoString(Nome);
 
             string linhaParaSalvar = idString + nomeString + DataCadastro + UltimaCompra + Situacao;
-            Save(linhaParaSalvar);
+            SalvarStringNoArquivo(linhaParaSalvar);
         }
         catch (Exception e) 
         {
@@ -62,13 +62,29 @@
             return 1;
 
     }
-    private void Save(string s)
+    private void SalvarStringNoArquivo(string s)
     {
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
         File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
     }
-    private string ConverterIdFormatoString(int id)
+    private static void SalvarObjetoNoArquivo(MateriaPrima obj)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        File.AppendAllText(caminho + arquivo, TransformarObjEmLinhaDoArquivo(obj) + Environment.NewLine);
+    }
+    private static void SalvarListaNoArquivo(List<MateriaPrima> lista)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"MateriaPrima.dat";
+        using (var writer = new StreamWriter(caminho+arquivo)){}
+        foreach (var item in lista)
+        {
+            SalvarObjetoNoArquivo(item);
+        }
+    }
+    private static string ConverterIdFormatoString(int id)
     {
         switch (id)
         {
@@ -85,7 +101,7 @@
         }
 
     }
-    private string ConverterNomeFormatoString(string nome)
+    private static string ConverterNomeFormatoString(string nome)
     {
         string nomeLimitado20;
         if (nome.Length > 20)
@@ -300,7 +316,35 @@
         return new(id, nome, dataCadastro, UltimaCompra, situacao);
 
     }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
+    private static string TransformarObjEmLinhaDoArquivo(MateriaPrima obj)
+    {
+        return $"{ConverterIdFormatoString(obj.Id)}{ConverterNomeFormatoString(obj.Nome)}{obj.DataCadastro}{obj.UltimaCompra}{obj.Situacao}";
+    }
+    public static bool EditarNomePorId(int id, string nome)
+    {
+        bool editou = false;
 
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach(MateriaPrima item in lista)
+        {
+            if(item.Id == id)
+            {
+                item.Nome = nome;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+        
+    }
 }
 
 
