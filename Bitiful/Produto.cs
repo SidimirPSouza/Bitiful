@@ -1,4 +1,6 @@
-﻿public class Produto
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+public class Produto
 {
     public string CodigoDeBarras { get; private set; }
     public string Nome { get; private set; }
@@ -17,6 +19,12 @@
         UltimaVenda = DataCadastro;
         Situacao = 'A';
 
+        string nomeString = ConverterNomeFormatoString(Nome);
+
+        string linhaParaSalvar = CodigoDeBarras + nomeString + ValorVenda + DataCadastro + UltimaVenda + Situacao;
+
+        SalvarStringNoArquivo(linhaParaSalvar);
+
     }
 
     //metodos utilizados internamente
@@ -29,6 +37,33 @@
             codigo += random.Next(1,10);
         }
         return codigo;
+    }
+    private void SalvarStringNoArquivo(string s)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
+        }
+    }
+    private static string ConverterNomeFormatoString(string nome)
+    {
+        string nomeLimitado20;
+        if (nome.Length > 20)
+            nomeLimitado20 = nome.Substring(0, 20);
+        else
+            nomeLimitado20 = nome;
+
+        string nomeFormatado = "";
+        for (int i = 0; i < 20 - nomeLimitado20.Length; i++)
+        {
+            nomeFormatado = nomeFormatado + "*";
+        }
+        nomeFormatado = nomeFormatado + nomeLimitado20;
+        return nomeFormatado;
+
     }
 
     //metodos para utilizar externamente independentes
