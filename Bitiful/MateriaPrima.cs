@@ -6,6 +6,7 @@
     public DateOnly DataCadastro { get; private set; }
     public char Situacao { get; set; }
 
+    //construtores
     public MateriaPrima(string nome)
     {
         try
@@ -36,6 +37,8 @@
         UltimaCompra = ultimaCompra;
         Situacao = situacao;
     }//construtor apenas para criar um objeto que recebe os atributos resgatados do arquivo(para salvar em uma lista quando necessario)
+    
+    //metodos utilizados internamente
     private int GerarNovoId()
     {
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
@@ -118,21 +121,35 @@
         return nomeFormatado;       
 
     }
-    public override string ToString()
+    private static MateriaPrima TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
     {
-        return $"""
+        int id = int.Parse(linhaAtual.Substring(2, 4));
+        int contAux = 0;
 
-            Id: {ConverterIdFormatoString(Id)}
-            Nome: {Nome}
-            UltimaCompra: {UltimaCompra}
-            DataCadastro: {DataCadastro}
-            Situacao: {Situacao}
+        for (int j = 0; j < 20; j++)
+        {
+            if (linhaAtual[j + 6] == '*')
+                contAux++;
+            else
+                break;
+        }
+        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
+        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
+        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
+        char situacao = linhaAtual[linhaAtual.Length - 1];
 
-            """;
+        return new(id, nome, dataCadastro, UltimaCompra, situacao);
+
+    }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
+    private static string TransformarObjEmLinhaDoArquivo(MateriaPrima obj)
+    {
+        return $"{ConverterIdFormatoString(obj.Id)}{ConverterNomeFormatoString(obj.Nome)}{obj.DataCadastro}{obj.UltimaCompra}{obj.Situacao}";
     }
+
+    //metodos para utilizar externamente independentes
     public static List<MateriaPrima> buscarTodosRegistros()
     {
-        List<MateriaPrima> lista = new ();
+        List<MateriaPrima> lista = new();
 
         var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
@@ -142,12 +159,13 @@
 
             if (linhas.Length > 0)
             {
-                foreach( string linhaAtual in linhas)
-                {                    
+                foreach (string linhaAtual in linhas)
+                {
                     lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                 }
-                
-            }else
+
+            }
+            else
                 return new List<MateriaPrima>();
 
             return lista;
@@ -156,7 +174,7 @@
         }
         else
             return new List<MateriaPrima>();
-    }  
+    }
     public static List<MateriaPrima> buscarRegistrosAtivos()
     {
         List<MateriaPrima> lista = new();
@@ -172,11 +190,11 @@
                 foreach (string linhaAtual in linhas)
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
-                    if(situacao == 'A')
-                    {                        
+                    if (situacao == 'A')
+                    {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                     }
-                    
+
                 }
 
             }
@@ -207,7 +225,7 @@
                 {
                     char situacao = linhaAtual[linhaAtual.Length - 1];
                     if (situacao == 'I')
-                    {                        
+                    {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                     }
                 }
@@ -238,7 +256,7 @@
             {
                 foreach (string linhaAtual in linhas)
                 {
-                    if(idInt == int.Parse(linhaAtual.Substring(2, 4)))
+                    if (idInt == int.Parse(linhaAtual.Substring(2, 4)))
                     {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
                         break;
@@ -274,7 +292,7 @@
                 {
                     IdString = IdString.ToUpper();
                     string idFormat = linhaAtual.Substring(0, 6);
-                    
+
                     if (idFormat == IdString)
                     {
                         lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
@@ -295,30 +313,6 @@
             return lista;
 
 
-    }
-    private static MateriaPrima TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
-    {
-        int id = int.Parse(linhaAtual.Substring(2, 4));
-        int contAux = 0;
-
-        for (int j = 0; j < 20; j++)
-        {
-            if (linhaAtual[j + 6] == '*')
-                contAux++;
-            else
-                break;
-        }
-        string nome = linhaAtual.Substring(6 + contAux, 20 - contAux);
-        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(26, 10));
-        DateOnly UltimaCompra = DateOnly.Parse(linhaAtual.Substring(36, 10));
-        char situacao = linhaAtual[linhaAtual.Length - 1];
-
-        return new(id, nome, dataCadastro, UltimaCompra, situacao);
-
-    }//nesse metodo eu não faço nenhuma validação, pois ele é privado e ele somente é chamado por outor metodo que a principio ja fez a devida validação
-    private static string TransformarObjEmLinhaDoArquivo(MateriaPrima obj)
-    {
-        return $"{ConverterIdFormatoString(obj.Id)}{ConverterNomeFormatoString(obj.Nome)}{obj.DataCadastro}{obj.UltimaCompra}{obj.Situacao}";
     }
     public static bool EditarNomePorId(int id, string nome)
     {
@@ -409,6 +403,20 @@
         if (editou)
             SalvarListaNoArquivo(lista);
 
+    }
+
+    //override ToString()
+    public override string ToString()
+    {
+        return $"""
+
+            Id: {ConverterIdFormatoString(Id)}
+            Nome: {Nome}
+            UltimaCompra: {UltimaCompra}
+            DataCadastro: {DataCadastro}
+            Situacao: {Situacao}
+
+            """;
     }
 }
 
