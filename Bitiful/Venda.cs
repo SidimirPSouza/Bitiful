@@ -3,9 +3,10 @@
 public class Venda
 {
     // Caminho da pasta e nome do arquivo usados para salvar os registros de venda.
-    public const string path = @"C:/dev/Biltiful";
+    public static readonly string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Bitiful\";
     public const string file = "Venda.dat";
-    private static string CaminhoArquivo => Path.Combine(path, file);
+    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file)
+        ?? throw new IOException($"Não foi possível validar o caminho do arquivo {file}.");
 
     // constantes de limite
     public const int TamanhoLinha = 31;
