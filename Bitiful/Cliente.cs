@@ -13,7 +13,6 @@
         this.Cpf = cpf;
     }
 
-
     //VALIDAÇÕES
 
     public bool ValidaLetrasNome(string nome)
