@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Data;
-using System.Globalization;
-using System.Net.NetworkInformation;
-using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
-using System.Xml.Linq;
-
-public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly ultimaCompra, DateOnly dataCadastro, char sexo, ESituacao situacao)
+﻿public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly ultimaCompra, DateOnly dataCadastro, char sexo, ESituacao situacao)
 {
     public string Cpf { get; private set; } = cpf;
     public string Nome { get; private set; } = nome;
@@ -23,7 +14,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
     }
 
 
-    //Validações das propriedades seguindo a regra de negócio
+    //VALIDAÇÕES
 
     public bool ValidaLetrasNome(string nome)
     {
@@ -119,16 +110,29 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
 
 
-    // Alteração dos dados
+    //ALTERAÇÃO DE DADOS
     public void AlteraNome(string nome)
     {
-        ValidaNome(nome);
-        this.Nome = nome;
+        if (ValidaNome(nome))
+        {
+            this.Nome = nome;
+        }
+        else
+        {
+            Console.WriteLine("Não fi possivel realizar a alteração do NOME");
+        }
 
     } // Recebe o novo nome e chama função validar nome, se retonar true ele atribui o novo nome para a propriedade Nome
     public void AlteraDataNascimento(DateOnly dataNascimento)
     {
-        this.DataNascimento = dataNascimento;
+        if (ValidaDataNascimento(dataNascimento))
+        {
+            this.DataNascimento = dataNascimento;
+        }
+        else
+        {
+            Console.WriteLine("Não foi possivel realizar a alteração da DATA DE NASCIMENTO. ");
+        }
     }
     public void AlteraSexo(char sexo)
     {
@@ -138,18 +142,25 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         }
         else
         {
-            throw new ArgumentException("Sexo inválido");
+            Console.WriteLine("Não foi possivel realizar a alteração do SEXO. ");
         }
 
     }
-    public ESituacao AlteraSituacaoAtivo(ESituacao situacao, char novoStatus)
+    public ESituacao AlteraSituacao(ESituacao situacao, char novoStatus)
     {
-        return situacao = (ESituacao)'A';
-    } //Altera situacao para ativo
-    public ESituacao AlteraSituacaoInativo(ESituacao situacao, char novoStatus)
-    {
-        return situacao = (ESituacao)'I';
-    }//Altera situacao para inativo
+        if (situacao == (ESituacao)'A')
+        {
+            return situacao = (ESituacao)'I';
+        }
+        else
+        {
+            return situacao = (ESituacao)'A';
+        }
+
+    } 
+
+
+    //ADIÇÃO E REMOÇÃO 
     public bool AdicionaInadimplentes(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf)
     {
         try
@@ -171,24 +182,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         }
         return false;
 
-    } // adiciona um cpf na lista de inadimplente
-    public bool RemoveInadimplentes(List<Cliente> inadimplentes, string cpf)
-    {
-        try
-        {
-            Cliente? cliente = inadimplentes.Find(c => c.Cpf == cpf); //receba um cliente c e retorne se o CPF dele é igual ao CPF procurado.
-
-            if (cliente is not null) // se o cliente não for nulo (ou seja se encontrar o cliente)
-            {
-                return inadimplentes.Remove(cliente); //remove o cliente da lista de inadimplentes
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Erro ao remover cliente inadimplente: {e.Message}");
-        }
-        return false;
-    }
+    } // Adiciona um CPF na lista de inadimplente
     public void AdicionaClientes(List<Cliente> clientes)
     {
 
@@ -233,7 +227,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
                 nome = null;
             }
         }
-        
+
         do
         {
             Console.WriteLine("Digite sua data de nascimento (DD/MM/AAAA):");
@@ -242,7 +236,7 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
             {
                 Console.WriteLine("Data de nascimento inválida.");
             }
-      
+
 
         } while (dataValida == false);
 
@@ -281,17 +275,45 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
         var novoCliente = new Cliente(cpf, nome, dataNascimento, ultimaCompra, dataCadastro, sexo, situacao);
         clientes.Add(novoCliente);
+    }// Adiciona cliente na lista de clientes
+    public bool RemoveCliente(List<Cliente> clientes, string cpf) // Remove serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
+    {
+        try
+        {
+            Cliente? cliente = clientes.Find(c => c.Cpf == cpf); //receba um cliente c e retorne se o CPF dele é igual ao CPF procurado.
+
+            if (cliente is not null) // se o cliente não for nulo (ou seja se encontrar o cliente)
+            {
+                return clientes.Remove(cliente); //remove o cliente da lista de inadimplentes
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao remover cliente inadimplente: {e.Message}");
+        }
+        return false;
     }
 
 
 
-    //RemoveCliente faltando
-    //BuscaDados faltando
-    //ImpressãoPorRegistro faltando
+    // BUSCA
+    public Cliente? BuscaCliente(List<Cliente> clientes, string cpf) // Serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
+    {
+        Cliente? cliente = clientes.Find(c => c.Cpf == cpf); // cria um objeto do tipo cliente e irá receber os dados do objeto com o cpf  
+
+        if (cliente is not null) //recebe um cliente e se o CPF dele não for nulo retorna o cliente 
+        {
+            return cliente;
+        }
+        else
+        {
+            Console.WriteLine("Cliente não encontrado");
+            return null;
+        }
+    }
 
 
-
-    // Carrega Lista de clientes
+    // LISTAS
     public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
@@ -341,33 +363,6 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
 
         return clientes;
     }
-
-    //Salvar lista de cliente no arquivo
-    public static void SalvarClientes(List<Cliente> clientes, string caminho)
-    {
-        try
-        {
-            var diretorio = Path.GetDirectoryName(caminho);
-
-            if (!Directory.Exists(diretorio))
-            {
-                Directory.CreateDirectory(diretorio);
-            }
-            using (var sw = new StreamWriter(caminho))
-            {
-                foreach (var cliente in clientes)
-                {
-                    sw.WriteLine(cliente.ToFile());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Ocorreu um erro ao salvar os contatos: {e.Message}");
-        }
-    }
-
-    // Carrega Inadimplentes
     public static List<Cliente> CarregaInadimplentes(string arquivo)
     {
         var clientes = new List<Cliente>();
@@ -401,8 +396,32 @@ public class Cliente(string cpf, string nome, DateOnly dataNascimento, DateOnly 
         return clientes;
     }
 
+    //SALVAR LISTA
+    public static void SalvarListas(List<Cliente> clientes, string caminho) // Serve para qualquer lista basta trocar a lista no parametro
+    {
+        try
+        {
+            var diretorio = Path.GetDirectoryName(caminho);
 
-    //Formatação para o arquivo
+            if (!Directory.Exists(diretorio))
+            {
+                Directory.CreateDirectory(diretorio);
+            }
+            using (var sw = new StreamWriter(caminho))
+            {
+                foreach (var cliente in clientes)
+                {
+                    sw.WriteLine(cliente.ToFile());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Ocorreu um erro ao salvar os contatos: {e.Message}");
+        }
+    }
+
+    //FORMATAÇÃO PARA ARQUIVO
     public string ToFile()
     {
 
