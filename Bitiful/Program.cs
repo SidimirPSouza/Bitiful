@@ -1,5 +1,5 @@
 ﻿
-List<MateriaPrima> lista = MateriaPrima.LocalizarPorChaveInt(4);
+List<MateriaPrima> lista = MateriaPrima.LocalizarPorChaveString("mp0003");
 
 foreach (MateriaPrima item in lista)
 {
