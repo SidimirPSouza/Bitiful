@@ -4,24 +4,35 @@ internal static class Utils
 {
     internal static bool ValidarCaminhoArquivo(string arquivo)
     {
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
-        if (!Directory.Exists(caminho))
-            Directory.CreateDirectory(caminho);
-
-        var caminhoArquivo = caminho + arquivo;
-        if (string.IsNullOrWhiteSpace(caminhoArquivo))
+        try
         {
-            Console.WriteLine("O caminho do arquivo não deve estar vazio");
+            var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+            if (!Directory.Exists(caminho))
+                Directory.CreateDirectory(caminho);
+
+            var caminhoArquivo = caminho + arquivo;
+            if (string.IsNullOrWhiteSpace(caminhoArquivo))
+            {
+                Console.WriteLine("O caminho do arquivo não deve estar vazio");
+                return false;
+            }
+            else
+            {
+                if (!File.Exists(caminhoArquivo))
+                {
+                    using (File.Create(caminhoArquivo))
+                    {
+
+                    }
+
+                }
+            }
+            return true;
+        }catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
             return false;
         }
-        else
-        {
-            if(!File.Exists(caminhoArquivo))
-            {
-                using (File.Create(caminhoArquivo)){}
-            }
-        }
-        return true;
     }
 
     internal static bool ValidarCPF(string cpf)
@@ -52,50 +63,73 @@ internal static class Utils
                 soma = (soma * 10) % 11;
                 soma = soma == 10 ? 0 : soma;
                 if (cpfFormatado[10] == soma.ToString()[0])
-                {
                     return true;
-                }
             }
         }
         return false;
     }
 
-
-
-    //private string ValidarCNPJ(string cnpj)
-
+    //internal static bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
     //{
-    //    cnpj = LimparCnpj(cnpj);
 
-    //    if (cnpj.Length == 14)
+    //    Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
+
+    //    if (cliente is null) // se o cliente for nulo
     //    {
-    //        int[] pesos = new[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
-    //        int soma = 0;
-    //        int resto = 0;
-    //        int primeiroDigito = 0;
-    //        int segundoDigito = 0;
-
-    //        for (int i = 0; i < pesos.Length; i++)
-
-    //        {
-    //            soma += int.Parse(cnpj[i].ToString()) * pesos[i];
-    //        }
-
-    //        resto = soma % 11;
-
-    //        if (resto < 2)
-
-    //        {
-    //            primeiroDigito = 0;
-    //        }
-
-    //        else
-    //        {
-
-    //        }
+    //        return true; //retorna true se o cliente não está cadastrado
     //    }
+    //    else
+    //        return false; //retorna false se ele já está cadastrado
     //}
 
+
+
+    internal static bool ValidarCNPJ(string cnpj)
+    {
+        //cnpj = Regex.Replace(cnpj, "[^a-zA-Z]", "");
+        cnpj = Regex.Replace(cnpj, "[^0-9]", "");
+
+        if (cnpj.Length == 14)
+        {
+            List<int> pesos = new List<int> { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int soma = 0;
+
+            for (int i = 0; i < pesos.Count; i++)
+            {
+                int num = cnpj[i] - '0';
+                soma = soma + (num * pesos[i]);
+            }
+            soma = soma % 11;
+            soma = soma < 2 ? 0 : 11 - soma;
+            if (cnpj[12] == soma.ToString()[0])
+            {
+                var newPesos = pesos.Prepend(6).ToList();
+                soma = 0;
+                for (int i = 0; i < newPesos.Count; i++)
+                {
+                    int num = cnpj[i] - '0';
+                    soma = soma + (num * newPesos[i]);
+                }
+                soma = soma % 11;
+                soma = soma < 2 ? 0 : 11 - soma;
+                if (cnpj[13] == soma.ToString()[0])
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    internal static ESituacao ValidaSituacao(ESituacao situacao, char status)
+    {
+        if (status == 'A')
+            return situacao = (ESituacao)status;
+        else
+            return situacao = (ESituacao)'I';
+    }
+
     //internal static bool ValidarData(string cpf)
+
+    //internal navegarLista
+    //internal ProcurarNaLista
 }
 
