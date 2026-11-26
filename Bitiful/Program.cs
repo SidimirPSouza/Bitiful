@@ -6,7 +6,8 @@ foreach (MateriaPrima item in lista)
     Console.Write(item.ToString());
 }
 
-MateriaPrima.EditarNomePorId(4, "agora vai");
+MateriaPrima.AtivarItem(3);
+MateriaPrima.AtivarItem(4);
 
 List<MateriaPrima> lista2 = MateriaPrima.buscarTodosRegistros();
 

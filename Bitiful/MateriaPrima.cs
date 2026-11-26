@@ -370,6 +370,46 @@
             return false;
 
     }
+    public static void InativarItem(int id)
+    {
+        bool editou = false;
+
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.Situacao = 'I';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
+
+    }
+    public static void AtivarItem(int id)
+    {
+        bool editou = false;
+
+        List<MateriaPrima> lista = buscarTodosRegistros();
+
+        foreach (MateriaPrima item in lista)
+        {
+            if (item.Id == id)
+            {
+                item.Situacao = 'A';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
+
+    }
 }
 
 
