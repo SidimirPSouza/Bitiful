@@ -33,9 +33,9 @@ public class Produto
         CodigoDeBarras = codigoDeBarras;
         Nome = nome;
         ValorVenda = valorVenda;
-        DataCadastro = DataCadastro;
-        UltimaVenda = UltimaVenda;
-        Situacao = Situacao;
+        DataCadastro = dataCadastro;
+        UltimaVenda = ultimaVenda;
+        Situacao = situacao;
     }
 
     //metodos utilizados internamente
@@ -142,7 +142,7 @@ public class Produto
 
         for (int j = 0; j < 20; j++)
         {
-            if (linhaAtual[j + 6] == '*')
+            if (linhaAtual[j + 13] == '*')
                 contAux++;
             else
                 break;
@@ -161,6 +161,34 @@ public class Produto
     }
 
     //metodos para utilizar externamente independentes
+    public static List<Produto> buscarTodosRegistros()
+    {
+        List<Produto> lista = new();
+
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                foreach (string linhaAtual in linhas)
+                {
+                    lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                }
+
+            }
+            else
+                return new List<Produto>();
+
+            return lista;
+
+
+        }
+        else
+            return new List<Produto>();
+    }
 
     //override ToString()
     public override string ToString()
