@@ -5,8 +5,8 @@ public class Produto
     public string CodigoDeBarras { get; private set; }
     public string Nome { get; private set; }
     public decimal ValorVenda { get; private set; }
-    public DateOnly UltimaVenda { get; private set; }
     public DateOnly DataCadastro { get; private set; }
+    public DateOnly UltimaVenda { get; private set; }
     public char Situacao { get; private set; }
 
     //construtores
@@ -27,6 +27,15 @@ public class Produto
 
         SalvarStringNoArquivo(linhaParaSalvar);
 
+    }
+    private Produto(string codigoDeBarras, string nome, decimal valorVenda, DateOnly dataCadastro, DateOnly ultimaVenda, char situacao)
+    {
+        CodigoDeBarras = codigoDeBarras;
+        Nome = nome;
+        ValorVenda = valorVenda;
+        DataCadastro = DataCadastro;
+        UltimaVenda = UltimaVenda;
+        Situacao = Situacao;
     }
 
     //metodos utilizados internamente
@@ -115,6 +124,26 @@ public class Produto
         }
 
         return $"{antes},{depois}";
+    }
+    private static Produto TransformarLinhaDoArquivoEmObjeto(string linhaAtual)
+    {
+        string codigoDeBarras = linhaAtual.Substring(0, 13);
+        int contAux = 0;
+
+        for (int j = 0; j < 20; j++)
+        {
+            if (linhaAtual[j + 6] == '*')
+                contAux++;
+            else
+                break;
+        }
+        string nome = linhaAtual.Substring(13 + contAux, 20 - contAux);
+        decimal valorVenda = decimal.Parse(linhaAtual.Substring(33, 6));
+        DateOnly dataCadastro = DateOnly.Parse(linhaAtual.Substring(39, 10));
+        DateOnly ultimaVenda = DateOnly.Parse(linhaAtual.Substring(49, 10));
+        char situacao = linhaAtual[linhaAtual.Length - 1];
+
+        return new(codigoDeBarras, nome, valorVenda, dataCadastro, ultimaVenda, situacao);
     }
     private static string TransformarObjEmLinhaDoArquivo(Produto obj)
     {
