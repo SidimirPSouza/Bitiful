@@ -6,33 +6,33 @@ internal static class Utils
     {
         try
         {
-            var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
-            if (!Directory.Exists(caminho))
-                Directory.CreateDirectory(caminho);
-
-            var caminhoArquivo = caminho + arquivo;
-            if (string.IsNullOrWhiteSpace(caminhoArquivo))
-            {
-                Console.WriteLine("O caminho do arquivo não deve estar vazio");
-                return false;
-            }
-            else
-            {
-                if (!File.Exists(caminhoArquivo))
-                {
-                    using (File.Create(caminhoArquivo))
-                    {
-
-                    }
-
-                }
-            }
-            return caminhoArquivo;
-        }catch (Exception e)
+            _ = ObterCaminhoArquivo(arquivo);
+            return true;
+        }
+        catch (Exception e)
         {
             Console.WriteLine(e.Message);
             return false;
         }
+    }
+
+    internal static string ObterCaminhoArquivo(string arquivo)
+    {
+        if (string.IsNullOrWhiteSpace(arquivo))
+            throw new ArgumentException("O nome do arquivo não deve estar vazio.", nameof(arquivo));
+
+        var diretorio = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Bitiful");
+        Directory.CreateDirectory(diretorio);
+
+        var caminhoArquivo = Path.Combine(diretorio, arquivo);
+        if (!File.Exists(caminhoArquivo))
+        {
+            using var _ = File.Create(caminhoArquivo);
+        }
+
+        return caminhoArquivo;
     }
 
     internal static bool ValidarCPF(string cpf)
@@ -74,13 +74,13 @@ internal static class Utils
 
         Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
 
-    //    if (cliente is null) // se o cliente for nulo
-    //    {
-    //        return true; //retorna true se o cliente não está cadastrado
-    //    }
-    //    else
-    //        return false; //retorna false se ele já está cadastrado
-    //}
+        if (cliente is null) // se o cliente for nulo
+        {
+            return true; //retorna true se o cliente não está cadastrado
+        }
+        else
+            return false; //retorna false se ele já está cadastrado
+    }
 
 
 

@@ -5,8 +5,7 @@ public class Venda
     // Caminho da pasta e nome do arquivo usados para salvar os registros de venda.
     public static readonly string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Bitiful\";
     public const string file = "Venda.dat";
-    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file)
-        ?? throw new IOException($"Não foi possível validar o caminho do arquivo {file}.");
+    private static string CaminhoArquivo => Utils.ObterCaminhoArquivo(file);
 
     // constantes de limite
     public const int TamanhoLinha = 31;
@@ -581,10 +580,20 @@ public class Venda
         }
 
         venda.DefinirValorTotal(itens);
+        var consumos = itens
+            .GroupBy(item => item.Produto)
+            .Select(grupo => (Codigo: grupo.Key, Quantidade: grupo.Sum(item => item.Quantidade)))
+            .ToList();
+
+        var producao = new Producao();
+        // Confere o estoque antes de gravar a venda; a baixa ocorre depois que ela e seus itens forem salvos.
+        producao.ValidarEstoqueProdutos(consumos);
+
         var vendas = CarregarTodas();
         vendas.Add(venda);
         SalvarTodas(vendas);
         ItemVenda.SalvarItens(itens);
+        producao.ConsumirProdutos(consumos);
         Console.WriteLine($"\nVenda {venda.Id:D5} salva. Total: R$ {venda.ValorTotal:N2}");
     }
 

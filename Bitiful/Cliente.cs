@@ -328,7 +328,7 @@
     public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
+        var diretorio = Utils.ObterCaminhoArquivo(arquivo);
 
         try
         {
@@ -376,7 +376,7 @@
     public static List<Cliente> CarregaInadimplentes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
+        var diretorio = Utils.ObterCaminhoArquivo(arquivo);
 
         try
         {
@@ -410,7 +410,7 @@
     {
         try
         {
-            var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
+            var diretorio = Utils.ObterCaminhoArquivo(arquivo);
 
             using (var sw = new StreamWriter(caminho))
             {
