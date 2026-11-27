@@ -111,8 +111,21 @@ public class Producao
         CarregarArquivo();
         Producao aux = new Producao();
         ItemProducao auxItemProd = new ItemProducao();
+
         if (ArquivoExistente())
         {
+            
+            if(Producoes.Find(p => p.Produto == produto) != null)
+            {
+                Producao aux2 = Producoes.Find(p => p.Produto == produto);
+                string novaQuantidade = FormatarQuantidade((decimal.Parse(Producoes[Producoes.IndexOf(aux2)].Quantidade) +
+                decimal.Parse(FormatarQuantidade(quantidade))).ToString());
+                if (!ValidarQuantidade(novaQuantidade)) return;
+                Producoes[Producoes.IndexOf(aux2)].Quantidade = novaQuantidade;
+                Console.WriteLine(Producoes.IndexOf(aux2));
+                SalvarArquivo();
+                return;
+            }
             aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
             aux.Produto = produto;
             aux.Quantidade = FormatarQuantidade(quantidade);
@@ -120,8 +133,6 @@ public class Producao
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
             else aux.Id = 1.ToString().PadLeft(5,'0');
-
-            
 
             Producoes.Add(aux);
             Console.WriteLine("Cadastrado com sucesso!");
@@ -266,6 +277,12 @@ public class Producao
     {
         if (decimal.Parse(quantidade) < 0) return false;
         string[] aux = quantidade.Split(",");
+        if (decimal.Parse(quantidade) >= 1000)
+        {
+            Console.WriteLine("Quantidade inválida");
+            return false;
+        }
+
         if (aux.Contains(","))
         {
             if (aux[1].Length > 2) return false;
@@ -281,6 +298,7 @@ public class Producao
     }
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
+        
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(','))
         {
