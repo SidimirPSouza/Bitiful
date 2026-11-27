@@ -111,8 +111,21 @@ public class Producao
         CarregarArquivo();
         Producao aux = new Producao();
         ItemProducao auxItemProd = new ItemProducao();
+
         if (ArquivoExistente())
         {
+            
+            if(Producoes.Find(p => p.Produto == produto) != null)
+            {
+                Producao aux2 = Producoes.Find(p => p.Produto == produto);
+                string novaQuantidade = FormatarQuantidade((decimal.Parse(Producoes[Producoes.IndexOf(aux2)].Quantidade) +
+                decimal.Parse(FormatarQuantidade(quantidade))).ToString());
+                if (!ValidarQuantidade(novaQuantidade)) return;
+                Producoes[Producoes.IndexOf(aux2)].Quantidade = novaQuantidade;
+                Console.WriteLine(Producoes.IndexOf(aux2));
+                SalvarArquivo();
+                return;
+            }
             aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
             aux.Produto = produto;
             aux.Quantidade = FormatarQuantidade(quantidade);
@@ -120,8 +133,6 @@ public class Producao
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
             else aux.Id = 1.ToString().PadLeft(5,'0');
-
-            
 
             Producoes.Add(aux);
             Console.WriteLine("Cadastrado com sucesso!");
@@ -163,12 +174,92 @@ public class Producao
     public void ImpressaoRegistro()
     {
         CarregarArquivo();
-        foreach(var item in Producoes)//Percorro a lista de produções e imprimo uma a uma
+        int index = 0;
+        int opcao = 0;
+        ItemProducao auxItemProd = new ItemProducao();
+        while (true)
         {
+            Console.Clear();
+            Console.WriteLine($"Item {index + 1} de {Producoes.Count}");
+            Console.WriteLine($"\nID:{int.Parse(Producoes[index].Id)}\tData de produção:{Producoes[index].DataProducao}\tProduto:{Producoes[index].Produto}\tQuantidade: {decimal.Parse(Producoes[index].Quantidade)}");
+            auxItemProd.ImprimirMateriaPrima(Producoes[index].Id);
+            Console.WriteLine("\n1 - Próximo\t2 - Anterior\t3 - Primeiro\t4 - Último\t5 - Ir para\t0 - Sair");
+            Console.WriteLine("Digite a opção: ");
+            try
+            {
+                opcao = int.Parse(Console.ReadLine());
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            if (opcao > 5 || opcao < 0) continue;
+            switch (opcao)
+            {
+                case 1:
+                    if (index + 1 < Producoes.Count) index++;
+                    else index = 0;
+                    break;
+                case 2:
+                    if (index - 1 >= 0) index--;
+                    else index = Producoes.Count-1;
+                    break;
+                case 3:
+                    index = 0;
+                    break;
+                case 4:
+                    index = Producoes.Count - 1;
+                    break;
+                case 5:
+                IrPara:
+                    int outraOpcao = 0;
+                    Console.WriteLine("Digite a posicão que deseja ir");
+                    try
+                    {
+                        outraOpcao = int.Parse(Console.ReadLine());
+                    }
+                    catch (Exception e) {
+                        Console.WriteLine(e.Message);
+                        goto IrPara;
+                    }
+                    if (outraOpcao < 0 || outraOpcao > Producoes.Count)
+                    {
+                        Console.WriteLine("Posição fora do alcance");
+                        goto IrPara;
+                    }
+                    index = outraOpcao - 1;
+                    break;
+                case 0:
+                    return;             
+            }
             
-            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {decimal.Parse(item.Quantidade)}");
         }
     }
+
+
+    public void DecrementarQuantidade(string produto, decimal quantidade)
+    {
+        CarregarArquivo();
+        if (ValidarQuantidade(produto, quantidade.ToString()))
+        {
+            Producao aux = Producoes.Find(p => p.Produto == produto);
+            aux.Quantidade = (decimal.Parse(aux.Quantidade) - quantidade).ToString();
+            aux.Quantidade = FormatarQuantidade(aux.Quantidade);
+        }
+        SalvarArquivo();
+    }
+    public bool ValidarQuantidade(string produto, string quantidade)
+    {
+        Producao aux = Producoes.Find(p => p.Produto == produto);
+        if(decimal.Parse(aux.Quantidade) - decimal.Parse(quantidade) < 0)
+        {
+            Console.WriteLine("Não tem produto o suficiente");
+            return false;
+        }
+        return true;
+    }
+    
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
         
@@ -186,6 +277,12 @@ public class Producao
     {
         if (decimal.Parse(quantidade) < 0) return false;
         string[] aux = quantidade.Split(",");
+        if (decimal.Parse(quantidade) >= 1000)
+        {
+            Console.WriteLine("Quantidade inválida");
+            return false;
+        }
+
         if (aux.Contains(","))
         {
             if (aux[1].Length > 2) return false;
@@ -201,6 +298,7 @@ public class Producao
     }
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
+        
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(','))
         {
