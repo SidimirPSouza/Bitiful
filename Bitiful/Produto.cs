@@ -256,6 +256,44 @@ public class Produto
             return new List<Produto>();
 
     }
+    public static List<Produto> LocalizarPorCodigoDeBarras(string codigoDeBarrasString)
+    {
+        List<Produto> lista = new();
+
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                foreach (string linhaAtual in linhas)
+                {
+                    codigoDeBarrasString = codigoDeBarrasString.ToUpper();
+                    string idFormat = linhaAtual.Substring(0, 13);
+
+                    if (idFormat == codigoDeBarrasString)
+                    {
+                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                        break;
+                    }
+
+                }
+
+            }
+            else
+                return lista;
+
+            return lista;
+
+
+        }
+        else
+            return lista;
+
+
+    }
 
     //override ToString()
     public override string ToString()
