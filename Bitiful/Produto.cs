@@ -344,7 +344,7 @@ public class Produto
             return false;
 
     }
-    public static bool EditarUltimaCompraPorCodigoDeBarras(string codigoDeBarras, DateOnly dataUltimaVenda)
+    public static bool EditarUltimaCompraPorCodigoDeBarras(string codigoDeBarras)
     {
         bool editou = false;
 
@@ -354,7 +354,7 @@ public class Produto
         {
             if (item.CodigoDeBarras == codigoDeBarras)
             {
-                item.UltimaVenda = dataUltimaVenda;
+                item.UltimaVenda = DateOnly.FromDateTime(DateTime.Now);
                 editou = true;
                 break;
             }
