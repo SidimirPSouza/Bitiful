@@ -344,7 +344,7 @@ public class Produto
             return false;
 
     }
-    public static bool EditarUltimaCompraPorId(string codigoDeBarras, DateOnly dataUltimaVenda)
+    public static bool EditarUltimaCompraPorCodigoDeBarras(string codigoDeBarras, DateOnly dataUltimaVenda)
     {
         bool editou = false;
 
@@ -367,6 +367,26 @@ public class Produto
         }
         else
             return false;
+
+    }
+    public static void InativarItem(string codigoDeBarras)
+    {
+        bool editou = false;
+
+        List<Produto> lista = buscarTodosRegistros();
+
+        foreach (Produto item in lista)
+        {
+            if (item.CodigoDeBarras == codigoDeBarras)
+            {
+                item.Situacao = 'I';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
 
     }
 
