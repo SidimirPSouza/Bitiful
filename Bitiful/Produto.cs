@@ -344,6 +344,31 @@ public class Produto
             return false;
 
     }
+    public static bool EditarUltimaCompraPorId(string codigoDeBarras, DateOnly dataUltimaVenda)
+    {
+        bool editou = false;
+
+        List<Produto> lista = buscarTodosRegistros();
+
+        foreach (Produto item in lista)
+        {
+            if (item.CodigoDeBarras == codigoDeBarras)
+            {
+                item.UltimaVenda = dataUltimaVenda;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+
+    }
 
     //override ToString()
     public override string ToString()
