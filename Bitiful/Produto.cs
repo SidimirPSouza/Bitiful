@@ -294,6 +294,31 @@ public class Produto
 
 
     }
+    public static bool EditarNomePorCodigoDeBarras(string codigoDeBarras, string nome)
+    {
+        bool editou = false;
+
+        List<Produto> lista = buscarTodosRegistros();
+
+        foreach (Produto item in lista)
+        {
+            if (item.CodigoDeBarras == codigoDeBarras)
+            {
+                item.Nome = nome;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+
+    }
 
     //override ToString()
     public override string ToString()
