@@ -389,6 +389,26 @@ public class Produto
             SalvarListaNoArquivo(lista);
 
     }
+    public static void AtivarItem(string codigoDeBarras)
+    {
+        bool editou = false;
+
+        List<Produto> lista = buscarTodosRegistros();
+
+        foreach (Produto item in lista)
+        {
+            if (item.CodigoDeBarras == codigoDeBarras)
+            {
+                item.Situacao = 'A';
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+            SalvarListaNoArquivo(lista);
+
+    }
 
     //override ToString()
     public override string ToString()
