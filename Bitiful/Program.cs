@@ -1,4 +1,5 @@
-﻿using System.Runtime.Intrinsics.X86;
+﻿using System.Numerics;
+using System.Runtime.Intrinsics.X86;
 
 Producao produzindo = new Producao();
 ItemProducao _itemProducao = new ItemProducao();
@@ -61,6 +62,14 @@ while(true){
 
             _itemProducao.ListarMateriaPrima(id, matPrima.ToUpper(), qtdMatPrima);
             break;
+        case 6:
+            Console.Write("codigo de barras:");
+            string _asd = Console.ReadLine();
+            Console.Write("quantidade: ");
+            decimal _asx = decimal.Parse(Console.ReadLine());
+            produzindo.DecrementarQuantidade(_asd, _asx);
+            break;
+
         case 0:
             Environment.Exit(0);
             break;

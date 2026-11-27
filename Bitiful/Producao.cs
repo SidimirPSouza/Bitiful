@@ -163,12 +163,92 @@ public class Producao
     public void ImpressaoRegistro()
     {
         CarregarArquivo();
-        foreach(var item in Producoes)//Percorro a lista de produções e imprimo uma a uma
+        int index = 0;
+        int opcao = 0;
+        ItemProducao auxItemProd = new ItemProducao();
+        while (true)
         {
+            Console.Clear();
+            Console.WriteLine($"Item {index + 1} de {Producoes.Count}");
+            Console.WriteLine($"\nID:{int.Parse(Producoes[index].Id)}\tData de produção:{Producoes[index].DataProducao}\tProduto:{Producoes[index].Produto}\tQuantidade: {decimal.Parse(Producoes[index].Quantidade)}");
+            auxItemProd.ImprimirMateriaPrima(Producoes[index].Id);
+            Console.WriteLine("\n1 - Próximo\t2 - Anterior\t3 - Primeiro\t4 - Último\t5 - Ir para\t0 - Sair");
+            Console.WriteLine("Digite a opção: ");
+            try
+            {
+                opcao = int.Parse(Console.ReadLine());
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            if (opcao > 5 || opcao < 0) continue;
+            switch (opcao)
+            {
+                case 1:
+                    if (index + 1 < Producoes.Count) index++;
+                    else index = 0;
+                    break;
+                case 2:
+                    if (index - 1 >= 0) index--;
+                    else index = Producoes.Count-1;
+                    break;
+                case 3:
+                    index = 0;
+                    break;
+                case 4:
+                    index = Producoes.Count - 1;
+                    break;
+                case 5:
+                IrPara:
+                    int outraOpcao = 0;
+                    Console.WriteLine("Digite a posicão que deseja ir");
+                    try
+                    {
+                        outraOpcao = int.Parse(Console.ReadLine());
+                    }
+                    catch (Exception e) {
+                        Console.WriteLine(e.Message);
+                        goto IrPara;
+                    }
+                    if (outraOpcao < 0 || outraOpcao > Producoes.Count)
+                    {
+                        Console.WriteLine("Posição fora do alcance");
+                        goto IrPara;
+                    }
+                    index = outraOpcao - 1;
+                    break;
+                case 0:
+                    return;             
+            }
             
-            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {decimal.Parse(item.Quantidade)}");
         }
     }
+
+
+    public void DecrementarQuantidade(string produto, decimal quantidade)
+    {
+        CarregarArquivo();
+        if (ValidarQuantidade(produto, quantidade.ToString()))
+        {
+            Producao aux = Producoes.Find(p => p.Produto == produto);
+            aux.Quantidade = (decimal.Parse(aux.Quantidade) - quantidade).ToString();
+            aux.Quantidade = FormatarQuantidade(aux.Quantidade);
+        }
+        SalvarArquivo();
+    }
+    public bool ValidarQuantidade(string produto, string quantidade)
+    {
+        Producao aux = Producoes.Find(p => p.Produto == produto);
+        if(decimal.Parse(aux.Quantidade) - decimal.Parse(quantidade) < 0)
+        {
+            Console.WriteLine("Não tem produto o suficiente");
+            return false;
+        }
+        return true;
+    }
+    
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
         
