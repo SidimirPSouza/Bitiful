@@ -189,6 +189,40 @@ public class Produto
         else
             return new List<Produto>();
     }
+    public static List<Produto> buscarRegistrosAtivos()
+    {
+        List<Produto> lista = new();
+
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+        if (Utils.ValidarCaminhoArquivo(arquivo))
+        {
+            string[] linhas = File.ReadAllLines(caminho + arquivo);
+
+            if (linhas.Length > 0)
+            {
+                foreach (string linhaAtual in linhas)
+                {
+                    char situacao = linhaAtual[linhaAtual.Length - 1];
+                    if (situacao == 'A')
+                    {
+                        lista.Add(TransformarLinhaDoArquivoEmObjeto(linhaAtual));
+                    }
+
+                }
+
+            }
+            else
+                return new List<Produto>();
+
+            return lista;
+
+
+        }
+        else
+            return new List<Produto>();
+
+    }
 
     //override ToString()
     public override string ToString()
