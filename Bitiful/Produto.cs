@@ -319,6 +319,31 @@ public class Produto
             return false;
 
     }
+    public static bool EditarValorDeVendaPorCodigoDeBarras(string codigoDeBarras, decimal valorVenda)
+    {
+        bool editou = false;
+
+        List<Produto> lista = buscarTodosRegistros();
+
+        foreach (Produto item in lista)
+        {
+            if (item.CodigoDeBarras == codigoDeBarras)
+            {
+                item.ValorVenda = valorVenda;
+                editou = true;
+                break;
+            }
+        }
+
+        if (editou)
+        {
+            SalvarListaNoArquivo(lista);
+            return true;
+        }
+        else
+            return false;
+
+    }
 
     //override ToString()
     public override string ToString()
