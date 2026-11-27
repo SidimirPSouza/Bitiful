@@ -50,6 +50,12 @@ public class Produto
             File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
         }
     }
+    private static void SalvarObjetoNoArquivo(Produto obj)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+        File.AppendAllText(caminho + arquivo, TransformarObjEmLinhaDoArquivo(obj) + Environment.NewLine);
+    }
     private static string ConverterNomeFormatoString(string nome)
     {
         string nomeLimitado20;
@@ -109,6 +115,10 @@ public class Produto
         }
 
         return $"{antes},{depois}";
+    }
+    private static string TransformarObjEmLinhaDoArquivo(Produto obj)
+    {
+        return $"{obj.CodigoDeBarras}{ConverterNomeFormatoString(obj.Nome)}{ConverterValorVendaFormatoString(obj.ValorVenda)}{obj.DataCadastro}{obj.UltimaVenda}{obj.Situacao}";
     }
 
     //metodos para utilizar externamente independentes
