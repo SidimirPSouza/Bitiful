@@ -65,6 +65,16 @@ public class Produto
         var arquivo = $"Produto.dat";
         File.AppendAllText(caminho + arquivo, TransformarObjEmLinhaDoArquivo(obj) + Environment.NewLine);
     }
+    private static void SalvarListaNoArquivo(List<Produto> lista)
+    {
+        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
+        var arquivo = $"Produto.dat";
+        using (var writer = new StreamWriter(caminho + arquivo)) { }
+        foreach (var item in lista)
+        {
+            SalvarObjetoNoArquivo(item);
+        }
+    }
     private static string ConverterNomeFormatoString(string nome)
     {
         string nomeLimitado20;
