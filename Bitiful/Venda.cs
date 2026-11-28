@@ -5,7 +5,8 @@ public class Venda
     // Caminho da pasta e nome do arquivo usados para salvar os registros de venda.
     public static readonly string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Bitiful\";
     public const string file = "Venda.dat";
-    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file);
+    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file)
+        ?? throw new IOException($"Não foi possível acessar o arquivo {file}.");
 
     // constantes de limite
     public const int TamanhoLinha = 31;
@@ -189,8 +190,6 @@ public class Venda
         bool somenteNovasVendas = linhasSalvas.Count <= novasLinhas.Count &&
             linhasSalvas.SequenceEqual(novasLinhas.Take(linhasSalvas.Count));
 
-        Directory.CreateDirectory(path);
-
         if (somenteNovasVendas)
         {
             using var sw = new StreamWriter(CaminhoArquivo, append: true);
@@ -305,7 +304,7 @@ public class Venda
     }
 
     // Carrega todas as vendas e exibe cada uma com nome, nascimento e itens.
-    private static void ExibirLista()
+    public static void ExibirLista()
     {
         Console.Clear();
         var vendas = CarregarTodas();
@@ -323,7 +322,7 @@ public class Venda
     }
 
     // Consulta o cadastro de Produto e exibe todos os produtos cadastrados, vendidos ou não.
-    private static void ExibirListaProdutos()
+    public static void ExibirListaProdutos()
     {
         Console.Clear();
         if (ListarProdutos is null)
@@ -383,19 +382,18 @@ public class Venda
         }
     }
 
-    // Lê Risco.dat, que contém um CPF por linha, e verifica se o cliente está inadimplente.
+    // Lê Risco.dat (gravado por Cliente.SalvarListas, CPF nos 11 primeiros caracteres) e verifica se o cliente está inadimplente.
     private static bool ClienteEstaInadimplente(string cpf)
     {
-        string caminhoRisco = Path.Combine(path, "Risco.dat");
-        if (!File.Exists(caminhoRisco))
-            return false;
+        string caminhoRisco = Utils.ValidarCaminhoArquivo("Risco.dat")
+            ?? throw new IOException("Não foi possível acessar o arquivo Risco.dat.");
 
         return File.ReadAllLines(caminhoRisco)
-            .Any(linha => string.Equals(linha.Trim(), cpf, StringComparison.Ordinal));
+            .Any(linha => linha.StartsWith(cpf, StringComparison.Ordinal));
     }
 
     // Aguarda uma tecla antes de retornar ao menu principal.
-    private static void PausarMenu()
+    public static void PausarMenu()
     {
         Console.WriteLine("\nPressione Enter para continuar...");
         try
@@ -433,80 +431,9 @@ public class Venda
     //
 
 
-    // Prepara os caminhos dos arquivos e controla a navegação do módulo de vendas.
-    public static void ExecutarMenu()
-    {
-        try
-        {
-            Directory.CreateDirectory(path);
-            Directory.CreateDirectory(ItemVenda.path);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao preparar a pasta de dados: {ex.Message}");
-            return;
-        }
-
-        while (true)
-        {
-            Console.Clear();
-            Console.WriteLine("=== MÓDULO DE VENDAS ===");
-            Console.WriteLine($"Pasta de dados: {path}");
-            Console.WriteLine("1 - Cadastrar venda");
-            Console.WriteLine("2 - Localizar venda");
-            Console.WriteLine("3 - Excluir venda e itens");
-            Console.WriteLine("4 - Exibir lista de vendas");
-            Console.WriteLine("5 - Exibir lista de produtos cadastrados");
-            Console.WriteLine("0 - Sair");
-            Console.Write("Opção: ");
-
-            try
-            {
-                switch (LerEntrada()?.Trim())
-                {
-                    case "1":
-                        CadastrarVendaNoMenu();
-                        PausarMenu();
-                        break;
-                    case "2":
-                        LocalizarVendaNoMenu();
-                        PausarMenu();
-                        break;
-                    case "3":
-                        ExcluirVendaNoMenu();
-                        PausarMenu();
-                        break;
-                    case "4":
-                        ExibirLista();
-                        PausarMenu();
-                        break;
-                    case "5":
-                        ExibirListaProdutos();
-                        PausarMenu();
-                        break;
-                    case "0":
-                        return;
-                    default:
-                        Console.WriteLine("Opção inválida.");
-                        PausarMenu();
-                        break;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine("Operação cancelada. Voltando ao menu principal.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ocorreu um erro: {ex.Message}");
-                PausarMenu();
-            }
-        }
-    }
-
     // Pede o CPF, busca o cliente pelo método conectado, exibe nome e nascimento,
     // confirma o cliente, recebe de 1 a 3 itens e grava a venda e os itens.
-    private static void CadastrarVendaNoMenu()
+    public static void CadastrarVendaNoMenu()
     {
         Console.Clear();
         if (ConsultarCliente is null)
@@ -662,7 +589,7 @@ public class Venda
     }
 
     // Procura o Id informado em Venda.dat e mostra os dados do cliente e os itens relacionados.
-    private static void LocalizarVendaNoMenu()
+    public static void LocalizarVendaNoMenu()
     {
         Console.Clear();
         Console.Write("Id da venda: ");
@@ -676,7 +603,7 @@ public class Venda
     }
 
     // Remove a venda pelo Id e apaga também os itens associados.
-    private static void ExcluirVendaNoMenu()
+    public static void ExcluirVendaNoMenu()
     {
         Console.Clear();
         Console.Write("Id da venda para excluir: ");

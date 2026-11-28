@@ -34,6 +34,10 @@ void Iniciar()
                 MenuProducao();
                 break;
 
+            case '7':
+                MenuVenda();
+                break;
+
             case '0':
                 Console.WriteLine("Opção inválida!");
                 break;
@@ -569,6 +573,77 @@ void MenuProducao()
         }
     }
 }
+#endregion
+
+#region Venda
+void MenuVenda()
+{
+    var menuVenda = new List<string>()
+    {
+        "1 - Cadastrar venda",
+        "2 - Localizar venda",
+        "3 - Excluir venda e itens",
+        "4 - Exibir lista de vendas",
+        "5 - Exibir lista de produtos cadastrados",
+        "0 - Voltar",
+    };
+
+    while (true)
+    {
+        Console.Clear();
+        Console.WriteLine("=== MÓDULO DE VENDAS ===");
+        Console.WriteLine($"Pasta de dados: {Venda.path}");
+
+        try
+        {
+            switch (Utils.CriarMenu(menuVenda))
+            {
+                case '1':
+                    Venda.CadastrarVendaNoMenu();
+                    Venda.PausarMenu();
+                    break;
+
+                case '2':
+                    Venda.LocalizarVendaNoMenu();
+                    Venda.PausarMenu();
+                    break;
+
+                case '3':
+                    Venda.ExcluirVendaNoMenu();
+                    Venda.PausarMenu();
+                    break;
+
+                case '4':
+                    Venda.ExibirLista();
+                    Venda.PausarMenu();
+                    break;
+
+                case '5':
+                    Venda.ExibirListaProdutos();
+                    Venda.PausarMenu();
+                    break;
+
+                case '0':
+                    return;
+
+                default:
+                    Console.WriteLine("Opção inválida!");
+                    Venda.PausarMenu();
+                    break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Operação cancelada. Voltando ao menu principal.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ocorreu um erro: {ex.Message}");
+            Venda.PausarMenu();
+        }
+    }
+}
+
 #endregion
 
 Iniciar();
