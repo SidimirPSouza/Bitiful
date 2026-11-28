@@ -101,11 +101,10 @@ public class Producao
             Console.WriteLine("Código de barras inválido");
             return;
         }
-        if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99
-        {
-            Console.WriteLine("Quantidade inválida, tem que ser no máximo 999,99");
-            return;
-        }
+
+        if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99   
+                return;
+
         CarregarArquivo();
         Producao aux = new Producao();
         ItemProducao auxItemProd = new ItemProducao();
@@ -134,6 +133,7 @@ public class Producao
 
             Producoes.Add(aux);
             Console.WriteLine("Cadastrado com sucesso!");
+
         }
         SalvarArquivo();
     }
@@ -220,12 +220,16 @@ public class Producao
     {
         
         CarregarArquivo();
-
+        
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
         {
             Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
             ItemProducao auxItemProd = new ItemProducao();
-
+            if (_producao == null)
+            {
+                Console.WriteLine("Produção não localizada, cheque o ID e tente novamente");    
+                return null;
+            }
             Console.WriteLine($"ID:{int.Parse(_producao.Id)}\tData de produção:{_producao.DataProducao}\tProduto:{_producao.Produto}\tQuantidade: {decimal.Parse(_producao.Quantidade)}");
             auxItemProd.ImprimirMateriaPrima(_producao.Id);
 
@@ -233,7 +237,7 @@ public class Producao
         }
         else
         {
-            Console.WriteLine("Não tem produções a serem localizadas");
+            Console.WriteLine("Não há produções a serem localizadas");
             return null;
         }
     }
@@ -243,6 +247,11 @@ public class Producao
         if (Producoes.Count > 0) //mesmo principio da função Localizar, só que dessa vez para excluir
         {
             var item = Producoes.FirstOrDefault(p => p.Id.Equals(id));
+            if(item == null)
+            {
+                Console.WriteLine("Produção não encontrada, cheque o ID e tente novamente");
+                return;
+            }
             Producoes.Remove(item);
             Console.WriteLine("Excluido com sucesso!");
         } else Console.WriteLine("Não tem produções a serem localizadas");
