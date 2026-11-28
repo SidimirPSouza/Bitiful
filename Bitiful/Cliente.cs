@@ -15,7 +15,7 @@
 
     //VALIDAÇÕES
 
-    public bool ValidaLetrasNome(string nome)
+    public static bool ValidaLetrasNome(string nome)
     {
         if (string.IsNullOrEmpty(nome))
         {
@@ -33,7 +33,7 @@
         }
         return true;
     } // irá validar se o nome possui apenas letras e espaço 
-    public bool ValidaTamanhoNome(string nome)
+    public static bool ValidaTamanhoNome(string nome)
     {
         if (nome.Length > 50)
         {
@@ -41,7 +41,7 @@
         }
         return true;
     } // irá validar se o tamanho do nome é menor ou igual a 50 se for retona true
-    public bool ValidaNome(string nome)
+    public static bool ValidaNome(string nome)
     {
         if (!ValidaLetrasNome(nome))
         {
@@ -67,7 +67,7 @@
 
         return false;
     }
-    public bool ValidaDataNascimento(DateOnly dataNascimento)
+    public static bool ValidaDataNascimento(DateOnly dataNascimento)
     {
         if (dataNascimento > DateOnly.FromDateTime(DateTime.Today))
         {
@@ -76,7 +76,7 @@
         else
             return true;
     }
-    public bool ValidaSexo(char sexo)
+    public static bool ValidaSexo(char sexo)
     {
         if (sexo == 'M' || sexo == 'F')
         {
@@ -96,21 +96,21 @@
             return situacao = (ESituacao)'I';
         }
     }
-    public bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
-    {
-        Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
+    //public static bool ValidaCPFCadastrado(List<Cliente> clientes, string cpf)
+    //{
+    //    Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
 
-        if (cliente is null) // se o cliente for nulo
-        {
-            return true; //retorna true se o cliente não está cadastrado
-        }
-        else
-            return false; //retorna false se ele já está cadastrado
-    }
+    //    if (cliente is null) // se o cliente for nulo
+    //    {
+    //        return true; //retorna true se o cliente não está cadastrado
+    //    }
+    //    else
+    //        return false; //retorna false se ele já está cadastrado
+    //}
 
 
     //ALTERAÇÃO DE DADOS
-    public void AlteraNome(string nome)
+    public void AlterarNome(string nome)
     {
         if (ValidaNome(nome))
         {
@@ -123,7 +123,7 @@
         }
 
     } // Recebe o novo nome e chama função validar nome, se retonar true ele atribui o novo nome para a propriedade Nome
-    public void AlteraDataNascimento(DateOnly dataNascimento)
+    public void AlterarDataNascimento(DateOnly dataNascimento)
     {
         if (ValidaDataNascimento(dataNascimento))
         {
@@ -135,7 +135,7 @@
             Console.WriteLine("Não foi possivel realizar a alteração da DATA DE NASCIMENTO. ");
         }
     }
-    public void AlteraSexo(char sexo)
+    public void AlterarSexo(char sexo)
     {
         if (ValidaSexo(sexo))
         {
@@ -148,7 +148,7 @@
         }
 
     }
-    public ESituacao AlteraSituacao(ESituacao situacao)
+    public ESituacao AlterarSituacao(ESituacao situacao)
     {
         if (situacao == (ESituacao)'A')
         {
@@ -162,7 +162,7 @@
     }
 
     //ADIÇÃO E REMOÇÃO 
-    public bool AdicionaInadimplentes(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf)
+    public static bool AdicionaInadimplentes(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf)
     {
         try
         {
@@ -175,6 +175,17 @@
                     inadimplentes.Add(cliente);
                     return true;
                 }
+                else
+                {
+                    Console.WriteLine("Cadastro de cliente não encontrado!");
+                    return false;
+                }
+
+            }
+            else
+            {
+                Console.WriteLine("O cliente já está na lista de inadimplente");
+                return false;
             }
         }
         catch (Exception e)
@@ -184,7 +195,8 @@
         return false;
 
     } // Adiciona um CPF na lista de inadimplente
-    public void AdicionaClientes(List<Cliente> clientes)
+
+    public static List<Cliente> AdicionaClientes(List<Cliente> clientes)
     {
 
         string? cpf = null;
@@ -210,7 +222,7 @@
                 Console.WriteLine("CPF digitado está incorreto.");
                 cpf = null;
             }
-            else if (!ValidaCPFCadastrado(clientes, cpf))
+            else if (!Utils.ValidaCPFCadastrado(clientes, cpf))
             {
                 Console.WriteLine("CPF já cadastrado no sistema.");
                 cpf = null;
@@ -277,8 +289,9 @@
 
         var novoCliente = new Cliente(cpf, nome, dataNascimento, sexo, situacao);
         clientes.Add(novoCliente);
+        return clientes;
     }// Adiciona cliente na lista de clientes
-    public bool RemoveCliente(List<Cliente> clientes, string cpf) // Remove serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
+    public static bool RemoveCliente(List<Cliente> clientes, string cpf) // Remove serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
     {
         try
         {
@@ -297,7 +310,7 @@
     }
 
     // BUSCA
-    public Cliente? BuscaCliente(List<Cliente> clientes, string cpf) // Serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
+    public static Cliente? BuscaCliente(List<Cliente> clientes, string cpf) // Serve tanto para clientes normais quanto inadimplente basta apenas trocar o parametro da lista
     {
         Cliente? cliente = clientes.Find(c => c.Cpf == cpf); // cria um objeto do tipo cliente e irá receber os dados do objeto com o cpf  
 
@@ -311,7 +324,33 @@
             return null;
         }
     }
-    void ExibirCliente(Cliente cliente)
+
+
+    public static void ListaInadimplente(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf)
+    {
+        try
+        {
+            if (inadimplentes.Find(c => c.Cpf == cpf) is not null) //receba um cliente c e retorne se o CPF dele é igual ao CPF procurado, se for nulo é porque ele não está na lista de inadimplentes.
+            {
+                Cliente? cliente = clientes.Find(c => c.Cpf == cpf); // cria um objeto do tipo cliente e irá receber os dados do objeto com o cpf if (cliente is not null) // se existir na lista de cliente ele adiciona na lista de inadimplentes
+                {
+                    ExibirCliente(cliente);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Cliente não encontrado na lista de inadimplentes");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao adicionar cliente inadimplente: {e.Message}");
+        }
+
+    }
+
+
+    public static void ExibirCliente(Cliente cliente)
     {
         Console.WriteLine("======================================");
         Console.WriteLine($"CPF: {cliente.Cpf}");
@@ -328,7 +367,7 @@
     public static List<Cliente> CarregaClientes(string arquivo)
     {
         var clientes = new List<Cliente>();
-        var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
+        var diretorio = Utils.ValidarCaminhoArquivo(arquivo);
 
         try
         {
@@ -381,21 +420,21 @@
         try
         {
 
-                foreach (var cliente in File.ReadAllLines(diretorio))
+            foreach (var cliente in File.ReadAllLines(diretorio))
+            {
+                if (cliente.Length != 92)
                 {
-                    if (cliente.Length != 92)
-                    {
-                        Console.WriteLine("Registro inválido.");
-                        continue;
-                    }
-
-                    string cpf = cliente.Substring(0, 11).Trim();
-
-                    var novoCliente = new Cliente(cpf);
-
-                    clientes.Add(novoCliente);
+                    Console.WriteLine("Registro inválido.");
+                    continue;
                 }
-            
+
+                string cpf = cliente.Substring(0, 11).Trim();
+
+                var novoCliente = new Cliente(cpf);
+
+                clientes.Add(novoCliente);
+            }
+
         }
         catch (Exception e)
         {
@@ -406,13 +445,13 @@
     }
 
     //SALVAR LISTA
-    public static void SalvarListas(List<Cliente> clientes, string caminho, string arquivo) // Serve para qualquer lista basta trocar a lista no parametro
+    public static void SalvarListas(List<Cliente> clientes, string arquivo) // Serve para qualquer lista basta trocar a lista no parametro
     {
         try
         {
-            var diretorio = Utils.ValidarCaminhoArquivo + (arquivo);
+            var diretorio = Utils.ValidarCaminhoArquivo(arquivo);
 
-            using (var sw = new StreamWriter(caminho))
+            using (var sw = new StreamWriter(diretorio))
             {
                 foreach (var cliente in clientes)
                 {
@@ -436,8 +475,22 @@
             $"{DataNascimento.ToString("dd/MM/yyyy")}" +
             $"{UltimaCompra.ToString("dd/MM/yyyy")}" +
             $"{DataCadastro.ToString("dd/MM/yyyy")}" +
-            $"{Sexo}";
+            $"{Sexo}" +
+            $"{Situacao}";
     }
 
+    public override string ToString()
+    {
 
+        return $"""
+                    {Cpf}
+                    {Nome} 
+                    {DataNascimento.ToString("dd/MM/yyyy")}
+                    {UltimaCompra.ToString("dd/MM/yyyy")}
+                    {DataCadastro.ToString("dd/MM/yyyy")}
+                    {Sexo} 
+                    {Situacao}
+                    """;
+
+    }
 }

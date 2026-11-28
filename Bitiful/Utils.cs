@@ -2,7 +2,7 @@
 
 internal static class Utils
 {
-    internal static bool ValidarCaminhoArquivo(string arquivo)
+    internal static string? ValidarCaminhoArquivo(string arquivo)
     {
         try
         {
@@ -14,7 +14,7 @@ internal static class Utils
             if (string.IsNullOrWhiteSpace(caminhoArquivo))
             {
                 Console.WriteLine("O caminho do arquivo não deve estar vazio");
-                return false;
+                return null;
             }
             else
             {
@@ -31,7 +31,7 @@ internal static class Utils
         }catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return false;
+            return null;
         }
     }
 
@@ -74,15 +74,24 @@ internal static class Utils
 
         Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
 
-    //    if (cliente is null) // se o cliente for nulo
-    //    {
-    //        return true; //retorna true se o cliente não está cadastrado
-    //    }
-    //    else
-    //        return false; //retorna false se ele já está cadastrado
-    //}
+        if (cliente is null) // se o cliente for nulo
+        {
+            return true; //retorna true se o cliente não está cadastrado
+        }
+        else
+            return false; //retorna false se ele já está cadastrado
+    }
 
-
+    public static bool ValidaCNPJCadastrado(string cnpj, List<Fornecedor> fornecedores)
+    {
+        Fornecedor? fornecedor = fornecedores.Find(f => f.Cnpj == cnpj);
+        if (fornecedor is null)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
 
     internal static bool ValidarCNPJ(string cnpj)
     {
@@ -129,10 +138,10 @@ internal static class Utils
 
     //internal static bool ValidarData(string cpf)
 
-    internal static char CreateMenu(List<string> options)
+    internal static char CriarMenu(List<string> opcoes)
     {
-        foreach (string item in options)
-            Console.Write(item);
+        foreach (string item in opcoes)
+            Console.Write(item + "\n") ;
         try
         {
             Console.Write("Informe a opção desejada: ");
@@ -144,9 +153,9 @@ internal static class Utils
         }
     }
 
-    internal static void ShowInformations<T>(List<T> models)
+    internal static void mostrarInformacoes<T>(List<T> modelos)
     {
-        if (models.Count.Equals(0))
+        if (modelos.Count.Equals(0))
         {
             Console.WriteLine("Nenhum contato encontrado!");
             Console.ReadKey();
@@ -161,10 +170,10 @@ internal static class Utils
             var options = new List<string> { "1 - Primeiro ", "2 - Anterior ", "3 - Próximo ", "4 - Último ", "0 - Sair\n" };
 
             Console.Clear();
-            Console.WriteLine($"Item {index + 1} de {models.Count}");
-            Console.WriteLine(models[index] + "\n");
+            Console.WriteLine($"Item {index + 1} de {modelos.Count}");
+            Console.WriteLine(modelos[index].ToString() + "\n");
 
-            switch (Utils.CreateMenu(options))
+            switch (Utils.CriarMenu(options))
             {
                 case '1':
                     index = 0;
@@ -175,11 +184,11 @@ internal static class Utils
                     break;
 
                 case '3':
-                    if (index < models.Count - 1) index++;
+                    if (index < modelos.Count - 1) index++;
                     break;
 
                 case '4':
-                    index = models.Count - 1;
+                    index = modelos.Count - 1;
                     break;
 
                 case '0':

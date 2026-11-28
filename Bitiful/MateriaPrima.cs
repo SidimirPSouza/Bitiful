@@ -41,15 +41,14 @@
     //metodos utilizados internamente
     private int GerarNovoId()
     {
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
             
             int ultimoId = 0;
 
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
@@ -151,11 +150,11 @@
     {
         List<MateriaPrima> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
@@ -179,11 +178,11 @@
     {
         List<MateriaPrima> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
@@ -213,11 +212,11 @@
     {
         List<MateriaPrima> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
@@ -246,11 +245,11 @@
     {
         List<MateriaPrima> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
@@ -280,11 +279,11 @@
     {
         List<MateriaPrima> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"MateriaPrima.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo);
 
             if (linhas.Length > 0)
             {
