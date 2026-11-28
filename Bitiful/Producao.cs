@@ -62,23 +62,28 @@ public class Producao
     }
     public void CarregarArquivo()//carregando a lista com o arquivo
     {
-        Producoes.Clear();
-        if (!ArquivoExistente())
-            return;
-
-        foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
+        if (ArquivoExistente())
         {
-            if (string.IsNullOrWhiteSpace(item))
-                continue;
-            if (item.Length != 34)
-                throw new FormatException("Registro de produção inválido: esperado 34 caracteres.");
+            Producoes.Clear();
+            var sr = new StreamReader(Diretorio + Arquivo);
+            if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
+            {
+                sr.Close();
+                return;
+            }
 
-            Producao aux = new Producao();
-            aux.Id = SepararPorTamanho(0, 5, item);
-            aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item), CultureInfo.InvariantCulture);
-            aux.Produto = SepararPorTamanho(15, 13, item).Trim();
-            aux.Quantidade = FormatarQuantidade(SepararPorTamanho(28, 6, item));
-            Producoes.Add(aux);
+            foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
+            {
+                Producao aux = new Producao();
+                aux.Id = SepararPorTamanho(0, 5, item);
+                aux.DataProducao = DateOnly.Parse(SepararPorTamanho(5, 10, item));
+                aux.Produto = SepararPorTamanho(15, 13, item);
+                string auxiliar = SepararPorTamanho(28, 6, item);
+                aux.Quantidade = FormatarQuantidade(auxiliar);
+                Producoes.Add(aux);
+
+            }
+            sr.Close();
         }
     }
     public void SalvarArquivo()//salvando a lista no arquivo
@@ -87,7 +92,7 @@ public class Producao
         {
             var sw = new StreamWriter(Diretorio + Arquivo);
 
-            foreach(var item in Producoes)
+            foreach (var item in Producoes)
             {
                 sw.WriteLine(item.Id + item.DataProducao + item.Produto + item.Quantidade);
             }
@@ -96,7 +101,7 @@ public class Producao
     }
     public void Cadastrar(string produto, string quantidade)
     {
-        if (produto.Length != 13 || !produto.All(char.IsDigit))//o codigo de barras tem que ter 13 caracteres
+        if (produto.Length != 13 || !produto.StartsWith("789") || !produto.All(char.IsDigit))//o codigo de barras tem que ter 13 caracteres
         {
             Console.WriteLine("Código de barras inválido");
             return;
@@ -128,15 +133,10 @@ public class Producao
             aux.Quantidade = FormatarQuantidade(ParseQuantidade(quantidade).ToString(CultureInfo.InvariantCulture));
 
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
-            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
-            else aux.Id = 1.ToString().PadLeft(5,'0');
+            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5, '0');
+            else aux.Id = 1.ToString().PadLeft(5, '0');
 
-            Producoes.Add(aux);
-            Console.WriteLine("Cadastrado com sucesso!");
 
-        }
-        SalvarArquivo();
-    }
 
     // Valida todos os produtos solicitados e baixa as produções mais antigas primeiro.
     // Nenhuma baixa é persistida se um produto não tiver estoque suficiente.
@@ -218,7 +218,7 @@ public class Producao
 
     public Producao? Localizar(string id)
     {
-        
+
         CarregarArquivo();
         
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
@@ -254,7 +254,8 @@ public class Producao
             }
             Producoes.Remove(item);
             Console.WriteLine("Excluido com sucesso!");
-        } else Console.WriteLine("Não tem produções a serem localizadas");
+        }
+        else Console.WriteLine("Não tem produções a serem localizadas");
         SalvarArquivo();
     }
     public void ImpressaoRegistro()
@@ -263,6 +264,12 @@ public class Producao
         int index = 0;
         int opcao = 0;
         ItemProducao auxItemProd = new ItemProducao();
+        if(Producoes.Count == 0)
+        {
+            Console.WriteLine("Não há produções a serem impressas");
+            Thread.Sleep(3000);
+            return;
+        }
         while (true)
         {
             Console.Clear();
@@ -275,7 +282,7 @@ public class Producao
             {
                 opcao = int.Parse(Console.ReadLine());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 continue;
@@ -289,7 +296,7 @@ public class Producao
                     break;
                 case 2:
                     if (index - 1 >= 0) index--;
-                    else index = Producoes.Count-1;
+                    else index = Producoes.Count - 1;
                     break;
                 case 3:
                     index = 0;
@@ -305,7 +312,8 @@ public class Producao
                     {
                         outraOpcao = int.Parse(Console.ReadLine());
                     }
-                    catch (Exception e) {
+                    catch (Exception e)
+                    {
                         Console.WriteLine(e.Message);
                         goto IrPara;
                     }
@@ -317,43 +325,21 @@ public class Producao
                     index = outraOpcao - 1;
                     break;
                 case 0:
-                    return;             
+                    return;
             }
-            
-        }
-    }
 
-
-    public void DecrementarQuantidade(string produto, decimal quantidade)
-    {
-        CarregarArquivo();
-        if (ValidarQuantidade(produto, quantidade.ToString()))
-        {
-            Producao aux = Producoes.Find(p => p.Produto == produto);
-            aux.Quantidade = (decimal.Parse(aux.Quantidade) - quantidade).ToString();
-            aux.Quantidade = FormatarQuantidade(aux.Quantidade);
-        }
-        SalvarArquivo();
-    }
-    public bool ValidarQuantidade(string produto, string quantidade)
-    {
-        Producao aux = Producoes.Find(p => p.Produto == produto);
-        if(decimal.Parse(aux.Quantidade) - decimal.Parse(quantidade) < 0)
-        {
-            Console.WriteLine("Não tem produto o suficiente");
-            return false;
         }
         return true;
     }
     
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
-        
+
         string aux = string.Empty;
         int auxTamanho = tamanho + inicio;
         for (int i = inicio; i < auxTamanho; i++)
         {
-           
+
             aux += aSerSeparada[i];
 
         }
@@ -376,16 +362,11 @@ public class Producao
         }
         catch (FormatException)
         {
-            return false;
+            if (aux[0].Length > 3) return false;
         }
-    }
 
-    private static decimal ParseQuantidade(string quantidade)
-    {
-        string normalizada = quantidade.Trim().Replace(',', '.');
-        if (!decimal.TryParse(normalizada, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal valor))
-            throw new FormatException($"Quantidade inválida: '{quantidade}'.");
-        return valor;
+
+        return true;
     }
 
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
