@@ -108,7 +108,7 @@ public class Producao
         }
 
         if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99   
-                return;
+            return;
 
         CarregarArquivo();
         Producao aux = new Producao();
@@ -116,12 +116,13 @@ public class Producao
 
         if (ArquivoExistente())
         {
-            
-            if(Producoes.Find(p => p.Produto == produto) != null)
+
+            if (Producoes.Find(p => p.Produto == produto) != null)
             {
                 Producao aux2 = Producoes.Find(p => p.Produto == produto);
                 string novaQuantidade = FormatarQuantidade((decimal.Parse(Producoes[Producoes.IndexOf(aux2)].Quantidade) +
                 decimal.Parse(FormatarQuantidade(quantidade))).ToString());
+
                 if (!ValidarQuantidade(novaQuantidade)) return;
                 Producoes[Producoes.IndexOf(aux2)].Quantidade = novaQuantidade;
                 Console.WriteLine(Producoes.IndexOf(aux2));
@@ -133,10 +134,13 @@ public class Producao
             aux.Quantidade = FormatarQuantidade(ParseQuantidade(quantidade).ToString(CultureInfo.InvariantCulture));
 
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
-            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5, '0');
-            else aux.Id = 1.ToString().PadLeft(5, '0');
-
-
+            if (Producoes.Count > 0)
+                aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5, '0');
+            else
+                aux.Id = 1.ToString().PadLeft(5, '0');
+            
+        }
+    }
 
     // Valida todos os produtos solicitados e baixa as produções mais antigas primeiro.
     // Nenhuma baixa é persistida se um produto não tiver estoque suficiente.
@@ -220,14 +224,14 @@ public class Producao
     {
 
         CarregarArquivo();
-        
+
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
         {
             Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
             ItemProducao auxItemProd = new ItemProducao();
             if (_producao == null)
             {
-                Console.WriteLine("Produção não localizada, cheque o ID e tente novamente");    
+                Console.WriteLine("Produção não localizada, cheque o ID e tente novamente");
                 return null;
             }
             Console.WriteLine($"ID:{int.Parse(_producao.Id)}\tData de produção:{_producao.DataProducao}\tProduto:{_producao.Produto}\tQuantidade: {decimal.Parse(_producao.Quantidade)}");
@@ -247,7 +251,7 @@ public class Producao
         if (Producoes.Count > 0) //mesmo principio da função Localizar, só que dessa vez para excluir
         {
             var item = Producoes.FirstOrDefault(p => p.Id.Equals(id));
-            if(item == null)
+            if (item == null)
             {
                 Console.WriteLine("Produção não encontrada, cheque o ID e tente novamente");
                 return;
@@ -264,7 +268,7 @@ public class Producao
         int index = 0;
         int opcao = 0;
         ItemProducao auxItemProd = new ItemProducao();
-        if(Producoes.Count == 0)
+        if (Producoes.Count == 0)
         {
             Console.WriteLine("Não há produções a serem impressas");
             Thread.Sleep(3000);
@@ -327,11 +331,9 @@ public class Producao
                 case 0:
                     return;
             }
-
         }
-        return true;
     }
-    
+
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
 
@@ -347,31 +349,45 @@ public class Producao
     }
     bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no limite de 999,99
     {
-        if (decimal.Parse(quantidade) < 0) return false;
-        string[] aux = quantidade.Split(",");
-        if (decimal.Parse(quantidade) >= 1000)
+        try
         {
-            Console.WriteLine("Quantidade inválida");
+
+            if (decimal.Parse(quantidade) < 0) return false;
+            string[] aux = quantidade.Split(",");
+            if (aux[0].Length > 3)
+                return false;
+            if (decimal.Parse(quantidade) >= 1000)
+            {
+                Console.WriteLine("Quantidade inválida");
+                return false;
+            }
+
+            if (aux.Contains(","))
+            {
+                decimal valor = ParseQuantidade(quantidade);
+                return valor > 0 && valor <= 999.99m;
+            }
+        }
+        catch (FormatException e)
+        {
+            Console.WriteLine(e.Message);
             return false;
         }
-
-        if (aux.Contains(","))
-        {
-            decimal valor = ParseQuantidade(quantidade);
-            return valor > 0 && valor <= 999.99m;
-        }
-        catch (FormatException)
-        {
-            if (aux[0].Length > 3) return false;
-        }
-
 
         return true;
     }
 
+    private static decimal ParseQuantidade(string quantidade)
+    {
+        string normalizada = quantidade.Trim().Replace(',', '.');
+        if (!decimal.TryParse(normalizada, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal valor))
+            throw new FormatException($"Quantidade inválida: '{quantidade}'.");
+        return valor;
+    }
+
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
-        
+
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(','))
         {
