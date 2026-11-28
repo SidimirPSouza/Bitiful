@@ -126,14 +126,22 @@
         if (!ValidarQuantidade(quantidade))
         {
             Console.WriteLine("Quantidade Inválida");
+            return;
         }
-        CarregarArquivo();
 
+        //if (ValidarMateriaPrima())
+        //{
+        //    Console.WriteLine("Matéria-prima não encontrada");
+        //    return;
+        //}
+
+        CarregarArquivo();
         ItemProducao aux = new ItemProducao();
         aux.IdProducao = idProducao.ToUpper();
         aux.MatPrima = materiaPrima;
         aux.QuantidadeMateriaPrima = FormatarQuantidade(quantidade);
         ListaItemProducao.Add(aux);
+        Console.WriteLine("Matéria-prima vinculada com sucesso!");
         SalvarArquivo();
     }
     public void ImprimirMateriaPrima(string idProducao)
@@ -147,6 +155,16 @@
         }
 
     }
+
+    //Validação da materia prima(checa se ela está na lista
+    //bool ValidarMateriaPrima(List<ItemProducao> ListaMateriaPrima, string id)
+    //{
+    //    if (ListaMateriaPrima.Find(mp => mp.IdProducao == id) == null)
+    //    {
+    //        return false;
+    //    }
+    //    return true;
+    //}
 
     bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
     {
