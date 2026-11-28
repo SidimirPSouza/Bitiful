@@ -1,12 +1,14 @@
 ﻿using System.Runtime.Intrinsics.X86;
 
+using System.Globalization;
+
 public class Producao
 {
     public string Id { get; private set; }
     public DateOnly DataProducao { get; set; }
     public string Produto { get; set; }
     public string Quantidade { get; set; }
-    public string Diretorio { get; private set; } = @"C:\dev\Biltiful\";
+    public string Diretorio { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Bitiful") + Path.DirectorySeparatorChar;
     public string Arquivo { get; private set; } = "Producao.dat";
     public ItemProducao ItemProd { get; set; }
     public List<Producao> Producoes = new List<Producao>();
@@ -41,7 +43,7 @@ public class Producao
             {
                 try
                 {
-                    File.Create(Diretorio + Arquivo);
+                    using (File.Create(Diretorio + Arquivo)) { }
                     return true;
                 }
                 catch (Exception ex)
@@ -104,19 +106,31 @@ public class Producao
             Console.WriteLine("Código de barras inválido");
             return;
         }
-        if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99
-        {
-            Console.WriteLine("Quantidade inválida, tem que ser no máximo 999,99");
-            return;
-        }
+
+        if (!ValidarQuantidade(quantidade))//a quantidade tem que ser no máximo 999,99   
+                return;
+
         CarregarArquivo();
         Producao aux = new Producao();
         ItemProducao auxItemProd = new ItemProducao();
+
         if (ArquivoExistente())
         {
+            
+            if(Producoes.Find(p => p.Produto == produto) != null)
+            {
+                Producao aux2 = Producoes.Find(p => p.Produto == produto);
+                string novaQuantidade = FormatarQuantidade((decimal.Parse(Producoes[Producoes.IndexOf(aux2)].Quantidade) +
+                decimal.Parse(FormatarQuantidade(quantidade))).ToString());
+                if (!ValidarQuantidade(novaQuantidade)) return;
+                Producoes[Producoes.IndexOf(aux2)].Quantidade = novaQuantidade;
+                Console.WriteLine(Producoes.IndexOf(aux2));
+                SalvarArquivo();
+                return;
+            }
             aux.DataProducao = DateOnly.FromDateTime(DateTime.Today);
             aux.Produto = produto;
-            aux.Quantidade = FormatarQuantidade(quantidade);
+            aux.Quantidade = FormatarQuantidade(ParseQuantidade(quantidade).ToString(CultureInfo.InvariantCulture));
 
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
             if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5, '0');
@@ -124,21 +138,98 @@ public class Producao
 
 
 
-            Producoes.Add(aux);
-            Console.WriteLine("Cadastrado com sucesso!");
+    // Valida todos os produtos solicitados e baixa as produções mais antigas primeiro.
+    // Nenhuma baixa é persistida se um produto não tiver estoque suficiente.
+    public void ConsumirProdutos(IEnumerable<(string Codigo, int Quantidade)> consumos)
+    {
+        ArgumentNullException.ThrowIfNull(consumos);
+        var solicitacoes = consumos.ToList();
+        if (solicitacoes.Count == 0)
+            throw new ArgumentException("Informe ao menos um produto para consumir.", nameof(consumos));
+
+        var totalPorProduto = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var (codigo, quantidade) in solicitacoes)
+        {
+            if (string.IsNullOrWhiteSpace(codigo) || codigo.Length != 13 || !codigo.All(char.IsDigit))
+                throw new ArgumentException("O código do produto deve conter 13 dígitos.", nameof(consumos));
+            if (quantidade < 1 || quantidade > ItemVenda.QuantidadeMaxima)
+                throw new ArgumentOutOfRangeException(nameof(consumos), $"A quantidade por produto deve estar entre 1 e {ItemVenda.QuantidadeMaxima}.");
+
+            totalPorProduto[codigo] = totalPorProduto.GetValueOrDefault(codigo) + quantidade;
         }
+
+        CarregarArquivo();
+        var saldos = Producoes.Select(producao => ParseQuantidade(producao.Quantidade)).ToArray();
+
+        foreach (var (codigo, quantidade) in totalPorProduto)
+        {
+            decimal disponivel = Producoes
+                .Select((producao, indice) => (producao, indice))
+                .Where(item => item.producao.Produto == codigo)
+                .Sum(item => saldos[item.indice]);
+
+            if (disponivel < quantidade)
+                throw new InvalidOperationException($"Estoque insuficiente para o produto {codigo}. Disponível: {disponivel:N2}; solicitado: {quantidade}.");
+        }
+
+        foreach (var (codigo, quantidade) in totalPorProduto)
+        {
+            decimal restante = quantidade;
+            for (int indice = 0; indice < Producoes.Count && restante > 0; indice++)
+            {
+                if (Producoes[indice].Produto != codigo || saldos[indice] <= 0)
+                    continue;
+
+                decimal baixa = Math.Min(saldos[indice], restante);
+                saldos[indice] -= baixa;
+                restante -= baixa;
+                Producoes[indice].Quantidade = FormatarQuantidade(saldos[indice].ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
         SalvarArquivo();
     }
+
+    public void ValidarEstoqueProdutos(IEnumerable<(string Codigo, int Quantidade)> consumos)
+    {
+        ArgumentNullException.ThrowIfNull(consumos);
+        var totalPorProduto = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var (codigo, quantidade) in consumos)
+        {
+            if (string.IsNullOrWhiteSpace(codigo) || codigo.Length != 13 || !codigo.All(char.IsDigit))
+                throw new ArgumentException("O código do produto deve conter 13 dígitos.", nameof(consumos));
+            if (quantidade < 1 || quantidade > ItemVenda.QuantidadeMaxima)
+                throw new ArgumentOutOfRangeException(nameof(consumos), $"A quantidade por produto deve estar entre 1 e {ItemVenda.QuantidadeMaxima}.");
+            totalPorProduto[codigo] = totalPorProduto.GetValueOrDefault(codigo) + quantidade;
+        }
+        if (totalPorProduto.Count == 0)
+            throw new ArgumentException("Informe ao menos um produto para consumir.", nameof(consumos));
+
+        CarregarArquivo();
+        foreach (var (codigo, quantidade) in totalPorProduto)
+        {
+            decimal disponivel = Producoes
+                .Where(producao => producao.Produto == codigo)
+                .Sum(producao => ParseQuantidade(producao.Quantidade));
+            if (disponivel < quantidade)
+                throw new InvalidOperationException($"Estoque insuficiente para o produto {codigo}. Disponível: {disponivel:N2}; solicitado: {quantidade}.");
+        }
+    }
+
     public Producao? Localizar(string id)
     {
 
         CarregarArquivo();
-
+        
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
         {
             Producao _producao = Producoes.FirstOrDefault(p => p.Id.Equals(id));
             ItemProducao auxItemProd = new ItemProducao();
-
+            if (_producao == null)
+            {
+                Console.WriteLine("Produção não localizada, cheque o ID e tente novamente");    
+                return null;
+            }
             Console.WriteLine($"ID:{int.Parse(_producao.Id)}\tData de produção:{_producao.DataProducao}\tProduto:{_producao.Produto}\tQuantidade: {decimal.Parse(_producao.Quantidade)}");
             auxItemProd.ImprimirMateriaPrima(_producao.Id);
 
@@ -146,7 +237,7 @@ public class Producao
         }
         else
         {
-            Console.WriteLine("Não tem produções a serem localizadas");
+            Console.WriteLine("Não há produções a serem localizadas");
             return null;
         }
     }
@@ -156,6 +247,11 @@ public class Producao
         if (Producoes.Count > 0) //mesmo principio da função Localizar, só que dessa vez para excluir
         {
             var item = Producoes.FirstOrDefault(p => p.Id.Equals(id));
+            if(item == null)
+            {
+                Console.WriteLine("Produção não encontrada, cheque o ID e tente novamente");
+                return;
+            }
             Producoes.Remove(item);
             Console.WriteLine("Excluido com sucesso!");
         }
@@ -233,7 +329,9 @@ public class Producao
             }
 
         }
+        return true;
     }
+    
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
 
@@ -247,16 +345,22 @@ public class Producao
         }
         return aux;
     }
-    bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no numero de caracteres que foram escritos
+    bool ValidarQuantidade(string quantidade)//valido a quantidade baseando no limite de 999,99
     {
         if (decimal.Parse(quantidade) < 0) return false;
         string[] aux = quantidade.Split(",");
+        if (decimal.Parse(quantidade) >= 1000)
+        {
+            Console.WriteLine("Quantidade inválida");
+            return false;
+        }
+
         if (aux.Contains(","))
         {
-            if (aux[1].Length > 2) return false;
-            if (aux[0].Length > 3) return false;
+            decimal valor = ParseQuantidade(quantidade);
+            return valor > 0 && valor <= 999.99m;
         }
-        else
+        catch (FormatException)
         {
             if (aux[0].Length > 3) return false;
         }
@@ -264,8 +368,10 @@ public class Producao
 
         return true;
     }
+
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)
     {
+        
         string[] aux = quantidade.Split(",");
         if (quantidade.Contains(','))
         {
