@@ -5,8 +5,7 @@ public class ItemVenda
     // Caminho da pasta e nome do arquivo usados para salvar os itens da venda.
     public static readonly string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Bitiful\";
     public const string file = "ItemVenda.dat";
-    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file)
-        ?? throw new IOException($"Não foi possível validar o caminho do arquivo {file}.");
+    private static string CaminhoArquivo => Utils.ObterCaminhoArquivo(file);
 
     // constantes de limite
     public const int TamanhoLinha = 32;
