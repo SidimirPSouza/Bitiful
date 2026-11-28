@@ -60,15 +60,16 @@ public class Producao
     }
     public void CarregarArquivo()//carregando a lista com o arquivo
     {
-        Producoes.Clear();
-        var sr = new StreamReader(Diretorio + Arquivo);
-        if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
-        {
-            sr.Close();
-            return;
-        }
         if (ArquivoExistente())
         {
+            Producoes.Clear();
+            var sr = new StreamReader(Diretorio + Arquivo);
+            if (sr.Read() == -1)//se o arquivo estiver vazio eu não carrego nada
+            {
+                sr.Close();
+                return;
+            }
+
             foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
             {
                 Producao aux = new Producao();
@@ -80,8 +81,8 @@ public class Producao
                 Producoes.Add(aux);
 
             }
+            sr.Close();
         }
-        sr.Close();
     }
     public void SalvarArquivo()//salvando a lista no arquivo
     {
@@ -89,7 +90,7 @@ public class Producao
         {
             var sw = new StreamWriter(Diretorio + Arquivo);
 
-            foreach(var item in Producoes)
+            foreach (var item in Producoes)
             {
                 sw.WriteLine(item.Id + item.DataProducao + item.Produto + item.Quantidade);
             }
@@ -98,7 +99,7 @@ public class Producao
     }
     public void Cadastrar(string produto, string quantidade)
     {
-        if (produto.Length != 13)//o codigo de barras tem que ter 13 caracteres
+        if (produto.Length != 13 || !produto.StartsWith("789") || !produto.All(char.IsDigit))//o codigo de barras tem que ter 13 caracteres
         {
             Console.WriteLine("Código de barras inválido");
             return;
@@ -118,10 +119,10 @@ public class Producao
             aux.Quantidade = FormatarQuantidade(quantidade);
 
             //se a lista estiver vazia, o id vai ser 1, se não segue sendo autoincrementado, preenchendo os espaços vazios com 0
-            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5,'0');
-            else aux.Id = 1.ToString().PadLeft(5,'0');
+            if (Producoes.Count > 0) aux.Id = (int.Parse(Producoes.Last().Id) + 1).ToString().PadLeft(5, '0');
+            else aux.Id = 1.ToString().PadLeft(5, '0');
 
-            
+
 
             Producoes.Add(aux);
             Console.WriteLine("Cadastrado com sucesso!");
@@ -130,7 +131,7 @@ public class Producao
     }
     public Producao? Localizar(string id)
     {
-        
+
         CarregarArquivo();
 
         if (Producoes.Count > 0)//se a lista não estiver vazia, retorno um objeto baseado no id que foi procurado
@@ -157,26 +158,90 @@ public class Producao
             var item = Producoes.FirstOrDefault(p => p.Id.Equals(id));
             Producoes.Remove(item);
             Console.WriteLine("Excluido com sucesso!");
-        } else Console.WriteLine("Não tem produções a serem localizadas");
+        }
+        else Console.WriteLine("Não tem produções a serem localizadas");
         SalvarArquivo();
     }
     public void ImpressaoRegistro()
     {
         CarregarArquivo();
-        foreach(var item in Producoes)//Percorro a lista de produções e imprimo uma a uma
+        int index = 0;
+        int opcao = 0;
+        ItemProducao auxItemProd = new ItemProducao();
+        if(Producoes.Count == 0)
         {
-            
-            Console.WriteLine($"ID:{int.Parse(item.Id)}\tData de produção:{item.DataProducao}\tProduto:{item.Produto}\tQuantidade: {decimal.Parse(item.Quantidade)}");
+            Console.WriteLine("Não há produções a serem impressas");
+            Thread.Sleep(3000);
+            return;
+        }
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine($"Item {index + 1} de {Producoes.Count}");
+            Console.WriteLine($"\nID:{int.Parse(Producoes[index].Id)}\tData de produção:{Producoes[index].DataProducao}\tProduto:{Producoes[index].Produto}\tQuantidade: {decimal.Parse(Producoes[index].Quantidade)}");
+            auxItemProd.ImprimirMateriaPrima(Producoes[index].Id);
+            Console.WriteLine("\n1 - Próximo\t2 - Anterior\t3 - Primeiro\t4 - Último\t5 - Ir para\t0 - Sair");
+            Console.WriteLine("Digite a opção: ");
+            try
+            {
+                opcao = int.Parse(Console.ReadLine());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            if (opcao > 5 || opcao < 0) continue;
+            switch (opcao)
+            {
+                case 1:
+                    if (index + 1 < Producoes.Count) index++;
+                    else index = 0;
+                    break;
+                case 2:
+                    if (index - 1 >= 0) index--;
+                    else index = Producoes.Count - 1;
+                    break;
+                case 3:
+                    index = 0;
+                    break;
+                case 4:
+                    index = Producoes.Count - 1;
+                    break;
+                case 5:
+                IrPara:
+                    int outraOpcao = 0;
+                    Console.WriteLine("Digite a posicão que deseja ir");
+                    try
+                    {
+                        outraOpcao = int.Parse(Console.ReadLine());
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        goto IrPara;
+                    }
+                    if (outraOpcao < 0 || outraOpcao > Producoes.Count)
+                    {
+                        Console.WriteLine("Posição fora do alcance");
+                        goto IrPara;
+                    }
+                    index = outraOpcao - 1;
+                    break;
+                case 0:
+                    return;
+            }
+
         }
     }
     string SepararPorTamanho(int inicio, int tamanho, string aSerSeparada)//percorro o trecho da string que foi definido pelo inicio e tamanho, e retorno o trecho especifico da string
     {
-        
+
         string aux = string.Empty;
         int auxTamanho = tamanho + inicio;
         for (int i = inicio; i < auxTamanho; i++)
         {
-           
+
             aux += aSerSeparada[i];
 
         }
@@ -195,8 +260,8 @@ public class Producao
         {
             if (aux[0].Length > 3) return false;
         }
-        
-        
+
+
         return true;
     }
     string FormatarQuantidade(string quantidade)//formato a quantidade para que sempre tenha 5 digitos(6 contando com a vírgula)

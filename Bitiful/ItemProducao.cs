@@ -68,6 +68,7 @@
                 sr.Close();
                 return;
             }
+            sr.Close();
             foreach (var item in File.ReadAllLines(Diretorio + Arquivo))
             {
                 ItemProducao aux = new ItemProducao();
@@ -77,9 +78,8 @@
                 string auxiliar = SepararPorTamanho(21, 6, item);
                 aux.QuantidadeMateriaPrima = FormatarQuantidade(auxiliar);
                 ListaItemProducao.Add(aux);
-
             }
-            sr.Close();
+            
         }
         
     }
