@@ -51,12 +51,11 @@ public class Produto
     }
     private void SalvarStringNoArquivo(string s)
     {
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"Produto.dat";
-
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            File.AppendAllText(caminho + arquivo, s + Environment.NewLine);
+            File.AppendAllText(caminhoArquivo + arquivo, s + Environment.NewLine);
         }
     }
     private static void SalvarObjetoNoArquivo(Produto obj)
@@ -165,11 +164,11 @@ public class Produto
     {
         List<Produto> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"Produto.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo + arquivo);
 
             if (linhas.Length > 0)
             {
@@ -193,11 +192,11 @@ public class Produto
     {
         List<Produto> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"Produto.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo + arquivo);
 
             if (linhas.Length > 0)
             {
@@ -227,11 +226,11 @@ public class Produto
     {
         List<Produto> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"Produto.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo + arquivo);
 
             if (linhas.Length > 0)
             {
@@ -260,11 +259,11 @@ public class Produto
     {
         List<Produto> lista = new();
 
-        var caminho = Environment.GetEnvironmentVariable("USERPROFILE") + $@"\Bitiful\";
         var arquivo = $"Produto.dat";
-        if (Utils.ValidarCaminhoArquivo(arquivo))
+        var caminhoArquivo = Utils.ValidarCaminhoArquivo(arquivo);
+        if (caminhoArquivo is not null)
         {
-            string[] linhas = File.ReadAllLines(caminho + arquivo);
+            string[] linhas = File.ReadAllLines(caminhoArquivo + arquivo);
 
             if (linhas.Length > 0)
             {
