@@ -82,7 +82,16 @@ internal static class Utils
             return false; //retorna false se ele já está cadastrado
     }
 
-
+    public static bool ValidaCNPJCadastrado(string cnpj, List<Fornecedor> fornecedores)
+    {
+        Fornecedor? fornecedor = fornecedores.Find(f => f.Cnpj == cnpj);
+        if (fornecedor is null)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
 
     internal static bool ValidarCNPJ(string cnpj)
     {
