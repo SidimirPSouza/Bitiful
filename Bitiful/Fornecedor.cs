@@ -26,29 +26,23 @@
         Situacao = situacao;
     }
 
+    public Fornecedor(string cnpj)
+    {
+        Cnpj = cnpj;
+    }
+
 
     //VALIDACOES
-    private bool ValidarTamanhoRS(string razaoSocial)
+    private static bool ValidarTamanhoRS(string razaoSocial)
     {
         return !string.IsNullOrWhiteSpace(razaoSocial)
         && razaoSocial.Length <= 50;
     }
 
-    private bool ValidarDataAbertura(DateOnly dataAbertura)
+    private static bool ValidarDataAbertura(DateOnly dataAbertura)
     {
         return dataAbertura <= DateOnly.FromDateTime(DateTime.Today);
 
-    }
-
-    public bool ValidaCNPJCadastrado(string cnpj, List<Fornecedor> fornecedores)
-    {
-        var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
-        if (fornecedor is null)
-        {
-            return true;
-        }
-        else
-            return false;
     }
 
     //ALTERACOES DOS DADOS
@@ -65,7 +59,7 @@
     }
 
     //ALTERAR STATUS ATIVO E INATIVO DO FORNECEDOR
-    public void AlterarStatusFornecedor(string cnpj, List<Fornecedor> fornecedores)
+    public static void AlterarStatusFornecedor(string cnpj, List<Fornecedor> fornecedores)
     {
         var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
 
@@ -84,7 +78,7 @@
 
 
     //CRIANDO UM FORNECEDOR
-    public Fornecedor CriarFornecedor(List<Fornecedor> fornecedores)
+    public static Fornecedor CriarFornecedor(List<Fornecedor> fornecedores)
     {
         try
         {
@@ -104,7 +98,7 @@
                     cnpj = null;
                 }
                 
-                else if (!ValidaCNPJCadastrado(cnpj, fornecedores))
+                else if (!Utils.ValidaCNPJCadastrado(cnpj, fornecedores))
                 {
                     Console.WriteLine("CNPJ já cadastrado no sistema.");
                     cnpj = null;
@@ -151,7 +145,7 @@
 
 
     //PROCURANDO UM FORNECEDOR PELO CNPJ
-    public Fornecedor ProcurarFornecedor(string cnpj, List<Fornecedor> fornecedores)
+    public static Fornecedor ProcurarFornecedor(string cnpj, List<Fornecedor> fornecedores)
     {
         if (cnpj is null || fornecedores is null)
             return null;
@@ -183,21 +177,21 @@
 
 
     //BLOQUEAR E DESBLOQUEAR O FORNECEDOR
-    public bool BloquearFornecedor(string cnpj, List<Fornecedor> fornecedores, string CaminhoArquivoBloqueados)
+    public static bool BloquearFornecedor(string cnpj, List<Fornecedor> fornecedores, string CaminhoArquivoBloqueados)
     {
         try
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados))
-                foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
-                {
-                    //pegando o cnpj do arquivo
-                    string cnpjBloq = c.Trim();
 
-                    //adicionando na lista o cnpj inativo
-                    cnpjsBloqueados.Add(cnpjBloq);
-                }
+            foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
+            {
+                //pegando o cnpj do arquivo
+                string cnpjBloq = c.Trim();
+
+                //adicionando na lista o cnpj inativo
+                cnpjsBloqueados.Add(cnpjBloq);
+            }
 
             //pegando o fornecedor da lista de fornecedores
             var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
@@ -232,18 +226,18 @@
         }
     }
 
-    public bool DesbloquearFornecedor(string cnpj, List<Fornecedor> fornecedores, string CaminhoArquivoBloqueados)
+    public static bool DesbloquearFornecedor(string cnpj, List<Fornecedor> fornecedores, string CaminhoArquivoBloqueados)
     {
         try
         {
             var cnpjsBloqueados = new List<string>();
 
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivoBloqueados))
-                foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
-                {
-                    string cnpjBloq = c.Trim();
-                    cnpjsBloqueados.Add(cnpjBloq);
-                }
+
+            foreach (var c in File.ReadAllLines(CaminhoArquivoBloqueados))
+            {
+                string cnpjBloq = c.Trim();
+                cnpjsBloqueados.Add(cnpjBloq);
+            }
 
             var fornecedor = ProcurarFornecedor(cnpj, fornecedores);
 
@@ -274,29 +268,59 @@
         var fornecedores = new List<Fornecedor>();
         try
         {
-            if (Utils.ValidarCaminhoArquivo(CaminhoArquivo))
-                foreach (var fornecedor in File.ReadAllLines(CaminhoArquivo))
-                {
-                    //pegando os dados do arquivo
-                    string cnpj = fornecedor.Substring(0, 14).Trim();
-                    string razaoSocial = fornecedor.Substring(14, 50).Trim();
-                    DateOnly dataAbertura = DateOnly.ParseExact(fornecedor.Substring(64, 10), "dd/MM/yyyy");
-                    DateOnly dataUltimaCompra = DateOnly.ParseExact(fornecedor.Substring(74, 10), "dd/MM/yyyy");
-                    DateOnly dataCadastro = DateOnly.ParseExact(fornecedor.Substring(84, 10), "dd/MM/yyyy");
-                    ESituacao situacao = Enum.Parse<ESituacao>(fornecedor.Substring(94).Trim());
+            foreach (var fornecedor in File.ReadAllLines(CaminhoArquivo))
+            {
+                //pegando os dados do arquivo
+                string cnpj = fornecedor.Substring(0, 14).Trim();
+                string razaoSocial = fornecedor.Substring(14, 50).Trim();
+                DateOnly dataAbertura = DateOnly.ParseExact(fornecedor.Substring(64, 10), "dd/MM/yyyy");
+                DateOnly dataUltimaCompra = DateOnly.ParseExact(fornecedor.Substring(74, 10), "dd/MM/yyyy");
+                DateOnly dataCadastro = DateOnly.ParseExact(fornecedor.Substring(84, 10), "dd/MM/yyyy");
+                ESituacao situacao = Enum.Parse<ESituacao>(fornecedor.Substring(94).Trim());
 
-                    //criando um objeto Fornecedor com os dados do arquivo
-                    var novoFornecedor = new Fornecedor(cnpj, razaoSocial, dataAbertura, dataUltimaCompra, dataCadastro, situacao);
-                    //adicionando na lista o novo objeto
-                    fornecedores.Add(novoFornecedor);
+                //criando um objeto Fornecedor com os dados do arquivo
+                var novoFornecedor = new Fornecedor(cnpj, razaoSocial, dataAbertura, dataUltimaCompra, dataCadastro, situacao);
+                //adicionando na lista o novo objeto
+                fornecedores.Add(novoFornecedor);
 
-                }
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine($"Ocorreu um erro ao carregar os fornecedores: {e.Message}");
         }
         //retorando a lista de fornecedores do arquivo
+        return fornecedores;
+    }
+
+    public static List<Fornecedor> CarregarBloqueados(string caminhoArquivo)
+    {
+        var fornecedores = new List<Fornecedor>();
+
+        try
+        {
+
+            foreach (var fornecedor in File.ReadAllLines(caminhoArquivo))
+            {
+                if (fornecedor.Length != 14)
+                {
+                    Console.WriteLine("Registro inválido.");
+                    continue;
+                }
+
+                string cnpj = fornecedor.Substring(0, 14).Trim();
+
+                var novoFornecedor = new Fornecedor(cnpj);
+
+                fornecedores.Add(novoFornecedor);
+            }
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Ocorreu um erro ao carregar os clientes: {e.Message}");
+        }
+
         return fornecedores;
     }
 
