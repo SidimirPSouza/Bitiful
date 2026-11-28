@@ -1,3 +1,7 @@
+using Microsoft.VisualBasic;
+using System.Globalization;
+using System.Security.Cryptography;
+
 var menu = new List<string>()
 {
     "1 - Clientes",
@@ -31,7 +35,7 @@ void Iniciar()
                 break;
 
             case '4':
-                MenuProducao();
+                 MenuProducao();
                 break;
 
             case '0':
@@ -61,7 +65,9 @@ void IniciarClientes()
     };
 
     var arquivo = "Clientes.dat";
+    var cpf = string.Empty;
     var clientes = Cliente.CarregaClientes(arquivo);
+    Cliente? cliente = null;
     Console.Clear();
     switch (Utils.CriarMenu(menuClientes))
     {
@@ -72,10 +78,19 @@ void IniciarClientes()
             break;
 
         case '2':
-            Console.Clear();
-            Console.WriteLine("Digite o CPF do cliente que deseja buscar");
-            var cpf = Console.ReadLine();
-            Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
+            while (string.IsNullOrEmpty(cpf))
+            {
+                Console.Clear();
+                Console.WriteLine("Digite o CPF do cliente que deseja buscar:");
+                cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
+
+                if (!Utils.ValidaCPFCadastrado(clientes, cpf) && Utils.ValidarCPF(cpf))
+                {
+                    cpf = string.Empty;
+                    Console.WriteLine("CPF inválido ou não cadastrado!");
+                }
+            }
+            cliente = clientes.Find(c => c.Cpf == cpf);
             Cliente.ExibirCliente(Cliente.BuscaCliente(clientes, cpf));
             break;
 
@@ -90,11 +105,18 @@ void IniciarClientes()
             break;
 
         case '5':
-            Console.Clear();
-            Console.WriteLine("Digite o CPF do cliente que deseja alterar");
-            cpf = Console.ReadLine();
+            while (string.IsNullOrEmpty(cpf))
+            {
+                Console.Clear();
+                Console.WriteLine("Digite o CPF do cliente que deseja alterar a situação:");
+                cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
+                if (!Utils.ValidaCPFCadastrado(clientes, cpf) && Utils.ValidarCPF(cpf))
+                {
+                    cpf = string.Empty;
+                    Console.WriteLine("CPF inválido ou não cadastrado!");
+                }
+            }
             cliente = clientes.Find(c => c.Cpf == cpf);
-
             var situacao = cliente.Situacao;
             cliente.AlterarSituacao(situacao);
             Console.WriteLine("Situação foi alterado com sucesso!");
@@ -103,10 +125,8 @@ void IniciarClientes()
         case '6':
             Console.Clear();
             var arquivoInadimplente = "Risco.dat";
-            Console.WriteLine("Digite o CPF do cliente que deseja alterar");
-            cpf = Console.ReadLine();
             var inadimplentes = Cliente.CarregaInadimplentes(arquivoInadimplente);
-            Inadimplente(clientes, inadimplentes, cpf, arquivoInadimplente);
+            Inadimplente(clientes, inadimplentes, arquivoInadimplente);
             break;
 
         case '0':
@@ -120,8 +140,9 @@ void IniciarClientes()
 
 }
 
-void Inadimplente(List<Cliente> clientes, List<Cliente> inadimplentes, string cpf, string arquivo)
+void Inadimplente(List<Cliente> clientes, List<Cliente> inadimplentes, string arquivo)
 {
+    var cpf = string.Empty;
     var menuClienteInadimplente = new List<string>()
 {
     "1 - Inserir Cliente na lista de Inadimplencia",
@@ -133,22 +154,56 @@ void Inadimplente(List<Cliente> clientes, List<Cliente> inadimplentes, string cp
     switch (Utils.CriarMenu(menuClienteInadimplente))
     {
         case '1':
-            if (Cliente.AdicionaInadimplentes(clientes, inadimplentes, cpf))
+            while (string.IsNullOrEmpty(cpf))
             {
-                Console.WriteLine("Cliente inadimplente adicionado com sucesso!");
-                Cliente.SalvarListas(inadimplentes, arquivo);
+                Console.Clear();
+                Console.WriteLine("Digite o CPF do cliente que deseja buscar:");
+                cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
+
+                if (!Utils.ValidaCPFCadastrado(clientes, cpf) && Utils.ValidarCPF(cpf))
+                {
+                    cpf = string.Empty;
+                    Console.WriteLine("CPF inválido ou não cadastrado!");
+                }
             }
+            Cliente.AdicionaInadimplentes(clientes, inadimplentes, cpf);
+            Console.WriteLine("Cliente inadimplente adicionado com sucesso!");
+            Cliente.SalvarListas(inadimplentes, arquivo);
             break;
 
         case '2':
-            if (Cliente.RemoveCliente(inadimplentes, cpf))
+            while (string.IsNullOrEmpty(cpf))
             {
-                Console.WriteLine("Cliente inadimplente removido com sucesso!");
-                Cliente.SalvarListas(inadimplentes, arquivo);
+                Console.Clear();
+                Console.WriteLine("Digite o CPF do cliente que deseja buscar:");
+                cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
+
+                if (!Utils.ValidaCPFCadastrado(clientes, cpf) && Utils.ValidarCPF(cpf))
+                {
+                    cpf = string.Empty;
+                    Console.WriteLine("CPF inválido ou não cadastrado!");
+                }
             }
+
+            Cliente.RemoveCliente(inadimplentes, cpf);
+            Console.WriteLine("Cliente inadimplente removido com sucesso!");
+            Cliente.SalvarListas(inadimplentes, arquivo);
+
             break;
 
         case '3':
+            while (string.IsNullOrEmpty(cpf))
+            {
+                Console.Clear();
+                Console.WriteLine("Digite o CPF do cliente que deseja buscar:");
+                cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
+
+                if (!Utils.ValidaCPFCadastrado(clientes, cpf) && Utils.ValidarCPF(cpf))
+                {
+                    cpf = string.Empty;
+                    Console.WriteLine("CPF inválido ou não cadastrado!");
+                }
+            }
             Cliente.ListaInadimplente(clientes, inadimplentes, cpf);
             break;
 
@@ -176,6 +231,8 @@ void AlterarCliente(List<Cliente> clientes, string arquivo, string? cpf)
 {
     Console.Clear();
     bool salvo = false;
+    var confirmacaoValor = '\0';
+
     var menuAlteraClientes = new List<string>()
     {
         "1 - Alterar nome",
@@ -192,67 +249,151 @@ void AlterarCliente(List<Cliente> clientes, string arquivo, string? cpf)
         {
             Console.Clear();
             Console.WriteLine("Digite o CPF do cliente que deseja alterar");
-            cpf = Console.ReadLine();
+            cpf = Utils.FormatarCPFCNPJ(Console.ReadLine());
         } while (!Utils.ValidarCPF(cpf) && Utils.ValidaCPFCadastrado(clientes, cpf));
     }
     Cliente? cliente = clientes.Find(c => c.Cpf == cpf);
     switch (Utils.CriarMenu(menuAlteraClientes))
     {
         case '1':
-            Console.WriteLine("Digite o novo nome");
-            var nome = Console.ReadLine();
+            var nome = string.Empty;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Digite o novo nome");
+                nome = Console.ReadLine();
+            } while (!Cliente.ValidaNome(nome));
+            Console.ReadLine();
             cliente.AlterarNome(nome);
             Console.Clear();
-            Console.WriteLine("Deseja continuar editando o cliente? (S/N)");
-            var confirmacao = char.Parse(Console.ReadLine());
             AlterarCliente(clientes, arquivo, cpf);
             break;
 
         case '2':
-            Console.WriteLine("Digite a nova data de nascimento");
-            var nasc = DateOnly.ParseExact(Console.ReadLine(), "dd/MM/yyyy");
+            DateOnly nasc;
+            bool conversao;
+            do
+            {
+                Console.Clear();
+                string[] formatos = { "dd/MM/yyyy", "ddMMyyyy" };
+                Console.WriteLine("Digite a nova data de nascimento");
+                conversao = DateOnly.TryParseExact(Console.ReadLine(), formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out nasc); // utilizado o chat gpt para me ajudar a validar a data de nascimento, pois estava dando erro ao digitar a data sem as barras
+            } while (!conversao || !Cliente.ValidaDataNascimento(nasc));
+
             cliente.AlterarDataNascimento(nasc);
             AlterarCliente(clientes, arquivo, cpf);
             break;
 
         case '3':
-            Console.WriteLine("Digite o novo sexo");
-            var sexo = char.Parse(Console.ReadLine());
+            var sexo = '\0';
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Digite o novo sexo");
+                char.TryParse(Console.ReadLine(), out sexo);
+                sexo = char.ToUpper(sexo);
+
+            } while (!Cliente.ValidaSexo(sexo));
             cliente.AlterarSexo(sexo);
             AlterarCliente(clientes, arquivo, cpf);
             break;
 
         case '4':
-            Console.WriteLine("Deseja Salvar? (S/N)");
-            confirmacao = char.Parse(Console.ReadLine());
-            if (confirmacao == 'S')
+            do
             {
-                Cliente.SalvarListas(clientes, arquivo);
-            }
-            AlterarCliente(clientes, arquivo, cpf);
+                Console.Clear();
+                Console.WriteLine("Deseja Salvar? (S/N)");
+                char.TryParse(Console.ReadLine(), out confirmacaoValor);
+                confirmacaoValor = char.ToUpper(confirmacaoValor);
+
+                if (confirmacaoValor == 'S')
+                {
+                    Cliente.SalvarListas(clientes, arquivo);
+                    salvo = true;
+                    Console.WriteLine("Valores salvos com sucesso!");
+                    do
+                    {
+                        Console.WriteLine("Deseja Continuar Editando? (S/N)");
+                        char.TryParse(Console.ReadLine(), out confirmacaoValor);
+                        confirmacaoValor = char.ToUpper(confirmacaoValor);
+                        if (confirmacaoValor == 'S')
+                        {
+                            AlterarCliente(clientes, arquivo, cpf);
+                        }
+                        else if (confirmacaoValor == 'N')
+                        {
+                            IniciarClientes();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Digite uma opção válida!");
+                            Console.WriteLine("Pressione enter para continuar.");
+                            Console.ReadKey();
+                        }
+                    } while (confirmacaoValor != 'S' && confirmacaoValor != 'N');
+                }
+                else if (confirmacaoValor == 'N')
+                {
+                    AlterarCliente(clientes, arquivo, cpf);
+                }
+                else
+                {
+                    Console.WriteLine("Digite uma opção válida!");
+                    Console.WriteLine("Pressione enter para continuar.");
+                    Console.ReadKey();
+                }
+            } while (confirmacaoValor != 'S' && confirmacaoValor != 'N');
             break;
 
         case '5':
-            Console.WriteLine("Deseja alterar o cliente a ser modificado? (S/N)");
-            confirmacao = char.Parse(Console.ReadLine());
-            if (confirmacao == 'S')
+            do
             {
-                AlterarCliente(clientes, arquivo, null);
-            }
-            AlterarCliente(clientes, arquivo, cpf);
+                Console.Clear();
+                Console.WriteLine("Deseja alterar o cliente a ser modificado? (S/N)");
+                char.TryParse(Console.ReadLine(), out confirmacaoValor);
+                confirmacaoValor = char.ToUpper(confirmacaoValor);
+
+                if (confirmacaoValor == 'S')
+                {
+                    AlterarCliente(clientes, arquivo, null);
+                }
+                else if (confirmacaoValor == 'N')
+                {
+                    AlterarCliente(clientes, arquivo, cpf);
+                }
+                if (confirmacaoValor != 'N' && confirmacaoValor != 'S')
+                {
+                    Console.WriteLine("Digite uma opção válida!");
+                }
+            } while (confirmacaoValor != 'S' && confirmacaoValor != 'N');
             break;
 
         case '0':
-            Console.Clear();
-            if (!salvo)
+
+            do
             {
-                Console.WriteLine("Tem certeza que deseja sair sem salvar? (S/N)");
-                confirmacao = char.Parse(Console.ReadLine());
-                if (confirmacao == 'N')
+                Console.Clear();
+                if (salvo == false)
                 {
-                    Cliente.SalvarListas(clientes, arquivo);
+                    Console.WriteLine("Tem certeza que deseja sair sem salvar? (S/N)");
+                    char.TryParse(Console.ReadLine(), out confirmacaoValor);
+                    confirmacaoValor = char.ToUpper(confirmacaoValor);
+
+                    if (confirmacaoValor == 'N')
+                    {
+                        Cliente.SalvarListas(clientes, arquivo);
+                        salvo = true;
+                    }
+                    if (confirmacaoValor != 'N' && confirmacaoValor != 'S')
+                    {
+                        Console.WriteLine("Digite uma opção válida!");
+                        Console.WriteLine("Pressione enter para continuar.");
+                        Console.ReadKey();
+                    }
                 }
-            }
+            } while (confirmacaoValor != 'S' && confirmacaoValor != 'N');
+
+
             IniciarClientes();
             break;
 
@@ -366,7 +507,7 @@ void Bloqueados(List<Fornecedor> fornecedores, List<Fornecedor> bloqueados, stri
 
         case '3':
             var fornecedorBloqueado = bloqueados.Find(f => f.Cnpj == cnpj);
-            Console.WriteLine(fornecedores.Find(f => f.Cnpj == fornecedorBloqueado.Cnpj).ToString()); 
+            Console.WriteLine(fornecedores.Find(f => f.Cnpj == fornecedorBloqueado.Cnpj).ToString());
             break;
 
         case '4':
@@ -422,7 +563,7 @@ void AlterarFornecedor(List<Fornecedor> fornecedores, string arquivo, string? cn
             Console.Clear();
             Console.WriteLine("Deseja continuar editando o fornecedor? (S/N)");
             var confirmacao = char.Parse(Console.ReadLine());
-            if(confirmacao == 'S')
+            if (confirmacao == 'S')
                 AlterarFornecedor(fornecedores, arquivo, null);
             break;
 
@@ -432,7 +573,7 @@ void AlterarFornecedor(List<Fornecedor> fornecedores, string arquivo, string? cn
             fornecedor.AlterarDataAbertura(abertura);
             Console.WriteLine("Deseja continuar editando o fornecedor? (S/N)");
             confirmacao = char.Parse(Console.ReadLine());
-            if(confirmacao == 'S')
+            if (confirmacao == 'S')
                 AlterarFornecedor(fornecedores, arquivo, cnpj);
             AlterarFornecedor(fornecedores, arquivo, null);
             break;

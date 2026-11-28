@@ -202,5 +202,13 @@ internal static class Utils
         }
     }
     //internal ProcurarNaLista
+
+    internal static string FormatarCPFCNPJ(string chave)
+    {
+       
+        return chave = chave.Replace(".", "").Replace("-", "").Replace("/", "");
+        
+        
+    }
 }
 
