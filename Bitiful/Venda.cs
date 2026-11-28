@@ -5,7 +5,7 @@ public class Venda
     // Caminho da pasta e nome do arquivo usados para salvar os registros de venda.
     public static readonly string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Bitiful\";
     public const string file = "Venda.dat";
-    private static string CaminhoArquivo => Utils.ObterCaminhoArquivo(file);
+    private static string CaminhoArquivo => Utils.ValidarCaminhoArquivo(file);
 
     // constantes de limite
     public const int TamanhoLinha = 31;

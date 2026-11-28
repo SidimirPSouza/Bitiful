@@ -128,7 +128,6 @@
             Console.WriteLine("Quantidade Inválida");
         }
         CarregarArquivo();
-
         ItemProducao aux = new ItemProducao();
         aux.IdProducao = idProducao.ToUpper();
         aux.MatPrima = materiaPrima;
